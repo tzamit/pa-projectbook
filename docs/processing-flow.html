@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>זרימת קוד העיבוד החודשי - מערכת PaymentsAid</title>
+  <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.7;
+  color: #1a1a2e;
+  background: #f8f9fa;
+  padding: 40px 20px;
+  direction: rtl;
+  max-width: 960px;
+  margin: 0 auto;
+}
+h1, h2, h3, h4, h5, h6 { color: #16213e; margin: 1.5em 0 0.5em; line-height: 1.3; }
+h1 { font-size: 2em; border-bottom: 3px solid #0f3460; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.2em; }
+h3 { font-size: 1.25em; color: #0f3460; }
+h4 { font-size: 1.1em; }
+p { margin: 0.8em 0; }
+a { color: #0f3460; text-decoration: underline; }
+strong { color: #0f3460; }
+code { background: #e8edf3; padding: 2px 6px; border-radius: 4px; font-family: 'Cascadia Code','Consolas',monospace; font-size: 0.9em; }
+pre { background: #1a1a2e; color: #e0e0e0; padding: 16px 20px; border-radius: 8px; overflow-x: auto; margin: 1em 0; direction: ltr; text-align: left; }
+pre code { background: none; padding: 0; color: inherit; font-size: 0.85em; }
+.table-wrapper { overflow-x: auto; margin: 1em 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+th, td { border: 1px solid #cbd5e0; padding: 8px 12px; text-align: right; }
+th { background: #0f3460; color: white; font-weight: 600; }
+tr:nth-child(even) { background: #f1f5f9; }
+tr:hover { background: #e2e8f0; }
+ul { margin: 0.5em 0 0.5em 0; padding-right: 2em; }
+li { margin: 0.3em 0; }
+hr { border: none; border-top: 2px solid #e2e8f0; margin: 2em 0; }
+.mermaid { background: white; text-align: center; direction: ltr; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; margin: 1em 0; overflow-x: auto; }
+@media print { body { padding: 20px; background: white; } pre { background: #f0f0f0; color: #333; } th { background: #333; } }
+</style>
+</head>
+<body>
+
+<h1>זרימת קוד העיבוד החודשי - מערכת PaymentsAid</h1>
+
+<h2>ארכיטקטורה כללית</h2>
+<pre><code>UI (RequestForm.cs) → BL (Business Logic) → DAL (TableAdapters) → DB (Stored Procedures)</code></pre>
+<p>כל שכבה יורשת מהשכבה שמתחתיה: <code>BL : BO</code>, <code>BO : BaseEntity</code>.<br>
+הגישה ל-DB מתבצעת דרך Typed DataSets + TableAdapters שקוראים ל-Stored Procedures.</p>
+
+<hr>
+
+<h2>שלבי העיבוד (RequestForm.cs)</h2>
+<p>העיבוד מתבצע ב-4 שלבים סדרתיים, כל שלב נרשם בטבלת <code>APP_GET_REQUESTS_CONTROL</code>:</p>
+
+<h3>Step 0 - קידום חודש עיבוד</h3>
+<pre><code>MonthsProcessBL.UpdateMonthsProcess() → usp_TAB_MONTHS_PROCESS_Update</code></pre>
+<p>מקדם את חודש העיבוד ב-1 לתוכנית הפעילה.</p>
+
+<h3>Step 1 - בדיקת מטופלים (CheckPatient)</h3>
+<p>לכל תוכנית נקראת פונקציה ייעודית:</p>
+<div class="table-wrapper"><table>
+<tr><th>תוכנית</th><th>פונקציה</th><th>SP בדיקה</th><th>SP שליפה</th></tr>
+<tr><td>עיוורים</td><td><code>CheckPationtForBlind()</code></td><td><code>usp_CheckBlindData</code></td><td><code>usp_GetDataFromBlindSystemStep1</code></td></tr>
+<tr><td>מונשמים</td><td><code>CheckPationtForRespirator()</code></td><td><code>usp_CheckRespiratorData</code></td><td><code>usp_GetDataFromRespiratorSystemStep1</code></td></tr>
+<tr><td>חירשים</td><td><code>CheckPationtForDeaf()</code></td><td><code>usp_CheckDeafData</code></td><td><code>usp_GetDataFromDeafSystemStep1</code></td></tr>
+<tr><td>כלב נחייה</td><td><code>CheckPationtForDogs()</code></td><td><code>usp_CheckBlindData</code></td><td><code>usp_GetDataFromDogsBlindSystemForIbudStep1</code></td></tr>
+</table></div>
+
+<p>זרימה:</p>
+<ul>
+<li>הרצת SP בדיקת תקינות נתונים</li>
+<li>שליפת רשימת מוטבים מהמערכת הייעודית</li>
+<li>לכל מוטב - בדיקת פרטים אישיים (<code>PatientDetailsBL.SelectByPatientDetails</code>)</li>
+<li>יצירת/עדכון בקשה (<code>RequestsBL.InsertUpdateRequests</code>)</li>
+<li>הצגת בעיות ב-DataGrid לאישור המשתמש</li>
+</ul>
+
+<h3>Step 2 - עיבוד וחישוב (Ibud)</h3>
+<p>הפונקציה המרכזית לכל תוכנית:</p>
+<div class="table-wrapper"><table>
+<tr><th>תוכנית</th><th>פונקציה</th></tr>
+<tr><td>עיוורים</td><td><code>MakeCalculationBlindNew()</code></td></tr>
+<tr><td>מונשמים</td><td><code>MakeCalculationRespirationNew()</code></td></tr>
+<tr><td>חירשים</td><td><code>MakeCalculationDeafNew()</code></td></tr>
+<tr><td>כלב נחייה</td><td><code>MakeCalculationDogBlindNew()</code></td></tr>
+</table></div>
+
+<h4>זרימת MakeCalculationBlindNew (דוגמה מייצגת):</h4>
+<pre><code>// 1. בדיקת תקינות נתונים
+SqlCommand("usp_CheckBlindData")
+
+// 2. העברת נתונים מהמערכת הייעודית
+SqlCommand("usp_GetDataFromBlindSystemStep2")
+
+// 3. שליפת בקשות בסטטוס "ממתין"
+RequestsBL.SelectByPaymentStatus(program, month, PaymentStatus.Wait)
+    → usp_APP_REQUESTS_SelectByPaymentStatus
+
+// 4. לולאה על כל בקשה:
+foreach (request in requests) {
+
+    // 4a. בדיקת זכאות מול הסמות
+    CheckEntitlementFromHasamot(request)
+        → Hasamot WCF Service
+
+    // 4b. שליפת פרטי מטופל
+    PatientDetailsBL.SelectByPatientDetails(idType, patientId, program)
+        → usp_APP_PATIENT_DETAILS_SelectByPatientDetail
+
+    // 4c. קביעת סוג עזרה (AidType) לפי:
+    //     - סטטוס תעסוקה
+    //     - גיל פנסיה
+    //     - קצבת שר"מ
+    request.AidTypeSymbol = ...
+
+    // 4d. שליפת סעיף תקציבי
+    SeifTakziviForAidTypeBL.SelectByAidType(aidTypeSymbol)
+        → usp_TAB_SEIF_TAKZIVI_FOR_AID_TYPE_SelectByAidType
+
+    // 4e. חישוב סכום תשלום
+    AidTypeTotalBL.SelectByAidTypeTotal(aidType, monthReport)
+        → usp_TAB_AID_TYPE_TOTAL_SelectByAidTypeTotal
+
+    // 4f. עדכון בקשה לסטטוס "עבר"
+    RequestsBL.UpdateRequests(request)
+        → usp_APP_REQUESTS_Update
+
+    // 4g. בניית רשומת תשלום חשבות
+    hashavutPaymentsList.Add(hashavutPayments)
+}
+
+// 5. שמירת תשלומים ל-DB
+foreach (payment in hashavutPaymentsList) {
+    HashavutPaymentsBL.InsertHashavutPayments(payment)
+        → usp_APP_HASHAVUT_PAYMENTS_Insert
+}
+
+// 6. בדיקת כפילויות
+DoublePaymentsBl.CheckIfHasDoublePayment(program, month)
+    → usp_CheckIfHasDoublePayment
+
+// 7. יצירת בקשות תמיכה למרכבה
+InsertUpdateSuportAppliction(program)
+    → SupportApplicationBL.InsertUpdate()
+        → usp_APP_SUPPORT_APPLICATION_InsertUpdate</code></pre>
+
+<h3>Step 3 - יצירת קבצים (Make Files)</h3>
+<pre><code>btnMakeFiles_Click() {
+    // שליפת תשלומים שלא נשלחו למרכבה
+    HashavutPaymentsBL.SelectFromHashvutNotInSupportApplication(month, program)
+
+    // יצוא לקובץ
+    ExportFileHashavut(hashavutList)      // עיוורים/כלב נחייה
+    ExportFileHashavutRespiration(list)   // מונשמים
+    ExportFileMattasDeaf(mattasList)      // חירשים - מט"ש
+    ExportFileMattasBlind(mattasList)     // עיוורים - מט"ש
+}</code></pre>
+
+<h3>Step 4 - עדכון סטטוס מרכבה</h3>
+<pre><code>// שליפת בקשות עם סטטוס חיזון
+SupportApplicationBL.SelectHizunStatusNotNull(program, month)
+    → usp_APP_SUPPORT_APPLICATION_SelectByHizunStatusNotNull
+
+// עדכון סטטוס תשלום חשבות
+HashavutPaymentsBL.UpdateUpdatePaymentReqStatus(payment)
+    → usp_APP_HASHAVUT_PAYMENTS_UpdatePaymentReqStatus</code></pre>
+
+<hr>
+
+<h2>תבנית גישה ל-DB (Pattern)</h2>
+<p>כל הגישות עוברות דרך אותו Pattern:</p>
+<pre><code>// BL Layer
+public ReturnType MethodName(params) {
+    // 1. יצירת TableAdapter
+    Dal.XxxDalTableAdapters.usp_XXX_SelectTableAdapter TA = new ...();
+    
+    // 2. יצירת DataTable
+    XxxDal.usp_XXX_SelectDataTable DT = new ...();
+    
+    // 3. קריאה ל-SP
+    DT = TA.GetDataByXxx(params);
+    
+    // 4. המרה לאובייקט/רשימה
+    return new XxxBL(DT[0]);  // או BaseEntity.PopulateList&lt;T&gt;(DT)
+}</code></pre>
+
+<hr>
+
+<h2>Stored Procedures מרכזיים</h2>
+<div class="table-wrapper"><table>
+<tr><th>SP</th><th>תפקיד</th></tr>
+<tr><td><code>usp_CheckBlindData</code> / <code>usp_CheckDeafData</code> / <code>usp_CheckRespiratorData</code></td><td>בדיקת תקינות נתונים לפני עיבוד</td></tr>
+<tr><td><code>usp_GetDataFromBlindSystemStep1</code> / <code>Step2</code></td><td>שליפת נתונים מהמערכת הייעודית</td></tr>
+<tr><td><code>usp_APP_REQUESTS_SelectByPaymentStatus</code></td><td>שליפת בקשות לפי סטטוס תשלום</td></tr>
+<tr><td><code>usp_APP_REQUESTS_Update</code></td><td>עדכון בקשה</td></tr>
+<tr><td><code>usp_APP_REQUESTS_InsertUpdate</code></td><td>הכנסה/עדכון בקשה (Upsert)</td></tr>
+<tr><td><code>usp_APP_PATIENT_DETAILS_SelectByPatientDetail</code></td><td>שליפת פרטי מטופל</td></tr>
+<tr><td><code>usp_TAB_SEIF_TAKZIVI_FOR_AID_TYPE_SelectByAidType</code></td><td>שליפת סעיף תקציבי</td></tr>
+<tr><td><code>usp_TAB_AID_TYPE_TOTAL_SelectByAidTypeTotal</code></td><td>שליפת סכום לסוג עזרה</td></tr>
+<tr><td><code>usp_APP_HASHAVUT_PAYMENTS_Insert</code></td><td>הכנסת תשלום חשבות</td></tr>
+<tr><td><code>usp_APP_MATTAS_PAYMENTS_Insert</code></td><td>הכנסת תשלום מט"ש</td></tr>
+<tr><td><code>usp_APP_SUPPORT_APPLICATION_InsertUpdate</code></td><td>יצירת בקשת תמיכה למרכבה</td></tr>
+<tr><td><code>usp_CheckIfHasDoublePayment</code></td><td>בדיקת כפילויות</td></tr>
+<tr><td><code>usp_APP_GET_REQUESTS_CONTROL_InsertUpdate</code></td><td>רישום בקרה</td></tr>
+</table></div>
+
+<hr>
+
+<h2>לוגיקת קביעת סוג עזרה (AidType)</h2>
+<pre><code>עובד?
+├── כן → BlindWorker (סמל 1)
+└── לא
+    ├── לא מקבל שר"מ + לא פנסיונר → BlindNotWorker (סמל 2)
+    ├── פנסיונר → OldMan (סמל 3)
+    └── אחר → MinTariff (סמל 4)</code></pre>
+<p>סכום התשלום נקבע לפי <code>TAB_AID_TYPE_TOTAL</code> בהתאם ל-AidType וחודש הדיווח.</p>
+
+<hr>
+
+<h2>ממשק מרכבה (Merkava Integration)</h2>
+<pre><code>APP_HASHAVUT_PAYMENTS → APP_SUPPORT_APPLICATION → מרכבה (ERP)
+                                                      ↓
+                                          עדכון PaymentReqMerkavaStatusHizon</code></pre>
+<p>סטטוסי חיזון:</p>
+<ul>
+<li><code>3</code> = סכום חיובי (לתשלום)</li>
+<li><code>6</code> = סכום שלילי (ניכוי/קיזוז)</li>
+<li><code>9</code> = שגיאה מצד מרכבה</li>
+</ul>
+
+<hr>
+
+<h2>תרשים זרימה מסכם</h2>
+<div class="mermaid">
+flowchart TD
+    S0[Step 0: קידום חודש] --> S1[Step 1: בדיקת מטופלים]
+    S1 --> S1a[שליפה מהמערכת הייעודית]
+    S1a --> S1b[בדיקת פרטים + יצירת בקשות]
+    S1b --> S1c[הצגת בעיות למשתמש]
+    S1c --> S2[Step 2: עיבוד]
+    S2 --> S2a[שליפת בקשות בסטטוס ממתין]
+    S2a --> S2b[לולאה: בדיקת זכאות + חישוב]
+    S2b --> S2c[קביעת AidType + סכום]
+    S2c --> S2d[שמירת תשלומים]
+    S2d --> S2e[יצירת בקשות תמיכה]
+    S2e --> S2f[בדיקת כפילויות]
+    S2f --> S3[Step 3: יצירת קבצים]
+    S3 --> S3a[ExportFile - קובץ למרכבה]
+    S3a --> S4[Step 4: עדכון סטטוס מרכבה]
+    S4 --> S4a[עדכון PaymentReqMerkavaStatusHizon]
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad: true, theme: 'default', securityLevel: 'loose'});</script>
+</body>
+</html>

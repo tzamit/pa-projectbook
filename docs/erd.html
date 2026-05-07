@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>דיאגרמת ERD - מערכת PaymentsAid</title>
+  <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.7;
+  color: #1a1a2e;
+  background: #f8f9fa;
+  padding: 40px 20px;
+  direction: rtl;
+  max-width: 960px;
+  margin: 0 auto;
+}
+h1, h2, h3, h4, h5, h6 { color: #16213e; margin: 1.5em 0 0.5em; line-height: 1.3; }
+h1 { font-size: 2em; border-bottom: 3px solid #0f3460; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.2em; }
+h3 { font-size: 1.25em; color: #0f3460; }
+p { margin: 0.8em 0; }
+a { color: #0f3460; text-decoration: underline; }
+strong { color: #0f3460; }
+code { background: #e8edf3; padding: 2px 6px; border-radius: 4px; font-family: 'Cascadia Code','Consolas',monospace; font-size: 0.9em; }
+
+pre { background: #1a1a2e; color: #e0e0e0; padding: 16px 20px; border-radius: 8px; overflow-x: auto; margin: 1em 0; direction: ltr; text-align: left; }
+pre code { background: none; padding: 0; color: inherit; font-size: 0.85em; }
+.table-wrapper { overflow-x: auto; margin: 1em 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+th, td { border: 1px solid #cbd5e0; padding: 8px 12px; text-align: right; }
+th { background: #0f3460; color: white; font-weight: 600; }
+tr:nth-child(even) { background: #f1f5f9; }
+tr:hover { background: #e2e8f0; }
+ul { margin: 0.5em 0 0.5em 0; padding-right: 2em; }
+li { margin: 0.3em 0; }
+hr { border: none; border-top: 2px solid #e2e8f0; margin: 2em 0; }
+.mermaid { background: white; text-align: center; direction: ltr; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; margin: 1em 0; overflow-x: auto; }
+@media print { body { padding: 20px; background: white; } pre { background: #f0f0f0; color: #333; } th { background: #333; } }
+</style>
+</head>
+<body>
+
+<h1>דיאגרמת ERD - מערכת PaymentsAid</h1>
+
+<h2>סקירה כללית</h2>
+<p>מערכת PaymentsAid היא מערכת לניהול תשלומי סיוע לנכים ובעלי מוגבלויות (עיוורים, חירשים, מונשמים, כלב נחייה). המערכת מנהלת בקשות, זכאויות, תשלומים וממשק מול מערכת מרכבה.</p>
+
+<hr>
+
+<h2>דיאגרמת ERD</h2>
+<div class="mermaid">
+erDiagram
+    APP_PATIENT_DETAILS {
+        int IDType_Num PK
+        varchar PatientID_Num PK
+        nvarchar BusinessArea PK
+        int ProgramSymbol FK
+        varchar PatientFirstName
+        varchar PatientLastName
+        int PatientGender_Num
+        datetime PatientBirthDate
+        int PatientBank_Num
+        int PatientBranch_Num
+        varchar PatientBankAccount
+        int Marganit_Num
+        int PatientMerkavaStatus FK
+        int PatientMerkavaNum
+    }
+    APP_REQUESTS {
+        int Request_Num PK
+        int IDType_Num
+        varchar PatientID_Num
+        int ProgramSymbol FK
+        int EmployeeStatus
+        int EntitlementDecision_Num FK
+        varchar MonthReport
+        varchar MonthProcessing
+        float TotalPayment
+        int RequestStatus_Num FK
+        int PaymentStatus_Num FK
+        int AidTypeSymbol FK
+        varchar SeifTakzivi
+    }
+    APP_SUPPORT_APPLICATION {
+        int SupportApplicationId PK
+        varchar PatintId_Num
+        int ProgramSymbol FK
+        nvarchar ApplicationTotalExpense
+        int ApplicationMerkavaStatusHizun FK
+        nvarchar MerkavaVoucher
+    }
+    APP_HASHAVUT_PAYMENTS {
+        int IDType_Num PK
+        varchar PatientID_Num PK
+        int ProgramSymbol PK
+        varchar MonthProcessing PK
+        float SchumNeto
+        float SchumShotef
+        float SchumRetro
+        int PaymentReqMerkavaStatusHizon FK
+    }
+    APP_MATTAS_PAYMENTS {
+        int IDType_Num PK
+        varchar PatientID_Num PK
+        int ProgramSymbol PK
+        varchar MonthProcessing PK
+        float TotalPayment
+        int AidTypeSymbol FK
+    }
+    BLIND {
+        int IDType_Num PK
+        varchar PatientID_Num PK
+        int EmployeeStatus
+        int EntitlementDecision FK
+        datetime DateStartWorking
+        datetime DateEndWorking
+    }
+    DEAF {
+        int IDType_Num PK
+        varchar PatientID_Num PK
+        int EmployeeStatus
+        int EntitlementDecision FK
+        int Blind
+    }
+    RESPIRATOR {
+        int IDType_Num PK
+        varchar PatientID_Num PK
+        bit IsTracheostomy
+        bit IsBTLEntitled
+        bit ForeignWorkerPermit
+    }
+    BLIND_DOG {
+        int IDType_Num PK
+        varchar PatientID_Num PK
+        int EntitlementDecision FK
+    }
+    TAB_RELATED_PROGRAMS {
+        int ProgramSymbol PK
+        varchar ProgramName
+    }
+    TAB_AID_TYPE {
+        int AidTypeSymbol PK
+        nvarchar AidTypeDesc
+    }
+    TAB_AID_TYPE_TOTAL {
+        int AidTypeSymbol FK
+        datetime AidTypeStartDate PK
+        double AidTypeTotalSum
+    }
+    TAB_MONTHS_PROCESS {
+        int ProgramSymbol FK
+        varchar MonthProcessing PK
+    }
+    T_PAYMENT_STATUS {
+        int PaymentStatusNum PK
+        varchar PaymentStatusDescr
+    }
+    T_REQUEST_STATUS {
+        int RequestStatusNum PK
+        varchar RequestStatusDescr
+    }
+    T_ENTITLEMENT_DECISION {
+        int EntitlementDecisionNum PK
+        varchar EntitlementDecisionDescr
+    }
+    APP_PATIENT_DETAILS ||--o{ APP_REQUESTS : "has"
+    APP_PATIENT_DETAILS }o--|| TAB_RELATED_PROGRAMS : "belongs"
+    APP_REQUESTS }o--|| T_PAYMENT_STATUS : "has"
+    APP_REQUESTS }o--|| T_REQUEST_STATUS : "has"
+    APP_REQUESTS }o--|| T_ENTITLEMENT_DECISION : "has"
+    APP_REQUESTS }o--|| TAB_AID_TYPE : "has"
+    APP_SUPPORT_APPLICATION }o--|| TAB_RELATED_PROGRAMS : "belongs"
+    APP_HASHAVUT_PAYMENTS }o--|| TAB_RELATED_PROGRAMS : "belongs"
+    APP_MATTAS_PAYMENTS }o--|| TAB_RELATED_PROGRAMS : "belongs"
+    APP_MATTAS_PAYMENTS }o--|| TAB_AID_TYPE : "has"
+    TAB_AID_TYPE ||--o{ TAB_AID_TYPE_TOTAL : "has"
+    BLIND }o--|| T_ENTITLEMENT_DECISION : "has"
+    DEAF }o--|| T_ENTITLEMENT_DECISION : "has"
+    BLIND_DOG }o--|| T_ENTITLEMENT_DECISION : "has"
+    TAB_MONTHS_PROCESS }o--|| TAB_RELATED_PROGRAMS : "belongs"
+</div>
+
+<hr>
+
+
+<h2>תיאור הטבלאות לפי קטגוריה</h2>
+
+<h3>טבלאות ליבה (Core)</h3>
+<div class="table-wrapper"><table>
+<tr><th>טבלה</th><th>תיאור</th><th>מפתח ראשי</th></tr>
+<tr><td><code>APP_PATIENT_DETAILS</code></td><td>פרטי מטופל/מוטב</td><td>IDType_Num + PatientID_Num + BusinessArea</td></tr>
+<tr><td><code>APP_REQUESTS</code></td><td>בקשות תשלום</td><td>Request_Num (Identity)</td></tr>
+<tr><td><code>APP_SUPPORT_APPLICATION</code></td><td>בקשות תמיכה למרכבה</td><td>SupportApplicationId (Identity)</td></tr>
+</table></div>
+
+<h3>טבלאות תוכניות ייעודיות (Program-Specific)</h3>
+<div class="table-wrapper"><table>
+<tr><th>טבלה</th><th>תיאור</th><th>מפתח ראשי</th></tr>
+<tr><td><code>BLIND</code></td><td>מוטבים עיוורים</td><td>IDType_Num + PatientID_Num</td></tr>
+<tr><td><code>BLIND_DOG</code></td><td>מוטבים עם כלב נחייה</td><td>IDType_Num + PatientID_Num</td></tr>
+<tr><td><code>DEAF</code></td><td>מוטבים חירשים</td><td>IDType_Num + PatientID_Num</td></tr>
+<tr><td><code>RESPIRATOR</code></td><td>מוטבים מונשמים</td><td>IDType_Num + PatientID_Num</td></tr>
+</table></div>
+
+<h3>טבלאות תשלומים (Payments)</h3>
+<div class="table-wrapper"><table>
+<tr><th>טבלה</th><th>תיאור</th><th>מפתח ראשי</th></tr>
+<tr><td><code>APP_HASHAVUT_PAYMENTS</code></td><td>תשלומי חשבות (מרכבה)</td><td>IDType + PatientID + Program + Month</td></tr>
+<tr><td><code>APP_MATTAS_PAYMENTS</code></td><td>תשלומי מט"ש (ישירים)</td><td>IDType + PatientID + Program + Month</td></tr>
+</table></div>
+
+<h3>טבלאות קוד (Lookup/Reference)</h3>
+<div class="table-wrapper"><table>
+<tr><th>טבלה</th><th>תיאור</th></tr>
+<tr><td><code>TAB_RELATED_PROGRAMS</code></td><td>מערכות ייעודיות (עיוורים=1, חירשים=2, מונשמים=3, כלב נחייה=4)</td></tr>
+<tr><td><code>TAB_AID_TYPE</code></td><td>סוגי עזרה</td></tr>
+<tr><td><code>TAB_AID_TYPE_TOTAL</code></td><td>סכומי סוגי עזרה לפי תקופה</td></tr>
+<tr><td><code>TAB_SEIF_TAKZIVI_FOR_AID_TYPE</code></td><td>סעיף תקציבי לסוג עזרה</td></tr>
+<tr><td><code>TAB_MONTHS_PROCESS</code></td><td>חודשי עיבוד לכל תוכנית</td></tr>
+<tr><td><code>T_PAYMENT_STATUS</code></td><td>סטטוס תשלום</td></tr>
+<tr><td><code>T_PAYMENT_TYPE</code></td><td>סוג תשלום</td></tr>
+<tr><td><code>T_REQUEST_STATUS</code></td><td>סטטוס בקשה</td></tr>
+<tr><td><code>T_ENTITLEMENT_DECISION</code></td><td>החלטת זכאות</td></tr>
+<tr><td><code>T_APPROVAL_TYPE</code></td><td>סוג אישור</td></tr>
+<tr><td><code>T_ACTION_STATUS</code></td><td>סטטוס פעולה</td></tr>
+<tr><td><code>T_TAKZIV_CLASSIFICATION</code></td><td>סיווג תקציבי</td></tr>
+<tr><td><code>T_INSTITUTION_TYPE</code></td><td>סוג מוסד</td></tr>
+<tr><td><code>T_BANK_ACCOUNT_OWNER</code></td><td>בעלות חשבון בנק</td></tr>
+<tr><td><code>T_ELIGIBLE</code></td><td>זכאות</td></tr>
+<tr><td><code>T_PatientMerkavaStatus</code></td><td>סטטוס מטופל במרכבה</td></tr>
+<tr><td><code>T_PatientMerkavaStatusReason</code></td><td>סיבת סטטוס מרכבה</td></tr>
+<tr><td><code>T_PaymentReqMerkavastatusHizon</code></td><td>סטטוס חיזון בקשת תשלום</td></tr>
+<tr><td><code>T_MESSAGE_TYPE</code></td><td>סוג הודעה</td></tr>
+</table></div>
+
+<h3>טבלאות תקשורת (Communication)</h3>
+<div class="table-wrapper"><table>
+<tr><th>טבלה</th><th>תיאור</th></tr>
+<tr><td><code>APP_MAILS</code></td><td>הודעות דוא"ל</td></tr>
+<tr><td><code>APP_MAILS_ATTACHMENTS</code></td><td>קבצים מצורפים לדוא"ל</td></tr>
+</table></div>
+
+<h3>טבלאות בקרה ותזמון (Control & Timing)</h3>
+<div class="table-wrapper"><table>
+<tr><th>טבלה</th><th>תיאור</th></tr>
+<tr><td><code>APP_GET_REQUESTS_CONTROL</code></td><td>בקרת עיבוד בקשות</td></tr>
+<tr><td><code>APP_TIMING_INTERFACE</code></td><td>תזמון ממשקים (מרכבה)</td></tr>
+</table></div>
+
+<h3>טבלאות משתמשים, מסמכים וגיבוי</h3>
+<div class="table-wrapper"><table>
+<tr><th>טבלה</th><th>תיאור</th></tr>
+<tr><td><code>APP_USERS</code></td><td>משתמשי המערכת</td></tr>
+<tr><td><code>APP_BENEFICIARY_DOCUMENTS</code></td><td>מסמכי מוטבים</td></tr>
+<tr><td><code>APP_REQUESTS_BACKUP</code></td><td>גיבוי בקשות</td></tr>
+<tr><td><code>APP_SUPPORT_APPLICATION_BACKUP</code></td><td>גיבוי בקשות תמיכה</td></tr>
+</table></div>
+
+<hr>
+
+<h2>קשרים עיקריים (Key Relationships)</h2>
+<ul>
+<li><strong>מטופל ← בקשות</strong>: כל מטופל (APP_PATIENT_DETAILS) יכול להיות קשור למספר בקשות (APP_REQUESTS)</li>
+<li><strong>בקשה ← תוכנית</strong>: כל בקשה שייכת לתוכנית ייעודית (TAB_RELATED_PROGRAMS)</li>
+<li><strong>בקשה ← סוג עזרה</strong>: כל בקשה מקושרת לסוג עזרה (TAB_AID_TYPE) שקובע את הסכום</li>
+<li><strong>סוג עזרה ← סכומים</strong>: לכל סוג עזרה יש סכומים לפי תקופות (TAB_AID_TYPE_TOTAL)</li>
+<li><strong>סוג עזרה ← סעיף תקציבי</strong>: מיפוי בין סוג עזרה לסעיף תקציבי (TAB_SEIF_TAKZIVI_FOR_AID_TYPE)</li>
+<li><strong>תשלומי חשבות</strong>: APP_HASHAVUT_PAYMENTS מייצג תשלומים דרך מערכת מרכבה</li>
+<li><strong>תשלומי מט"ש</strong>: APP_MATTAS_PAYMENTS מייצג תשלומים ישירים</li>
+<li><strong>טבלאות תוכנית</strong>: BLIND, DEAF, RESPIRATOR, BLIND_DOG - כל אחת מנהלת נתונים ספציפיים לתוכנית</li>
+</ul>
+
+<hr>
+
+<h2>זרימת נתונים עיקרית</h2>
+<pre><code>מטופל (APP_PATIENT_DETAILS)
+    │
+    ├── בקשה (APP_REQUESTS)
+    │       │
+    │       ├── סוג עזרה (TAB_AID_TYPE) → סכום (TAB_AID_TYPE_TOTAL)
+    │       ├── סטטוס בקשה (T_REQUEST_STATUS)
+    │       ├── סטטוס תשלום (T_PAYMENT_STATUS)
+    │       └── סוג תשלום (T_PAYMENT_TYPE)
+    │
+    ├── בקשת תמיכה למרכבה (APP_SUPPORT_APPLICATION)
+    │
+    ├── תשלום חשבות (APP_HASHAVUT_PAYMENTS)
+    │
+    └── תשלום מט"ש (APP_MATTAS_PAYMENTS)</code></pre>
+
+<hr>
+
+<h2>תרשים ארכיטקטורת המערכת</h2>
+<div class="mermaid">
+graph TB
+    subgraph UI["שכבת ממשק משתמש (UI)"]
+        MainForm[MainForm - טופס ראשי]
+        QueryForm[QueryForm - שאילתות]
+        Reports[Reports - דוחות]
+    end
+    subgraph BL["שכבת לוגיקה עסקית (BL)"]
+        RequestsBL[RequestsBL]
+        PatientDetailsBL[PatientDetailsBL]
+        BlindBL[BlindBL]
+        DeafBL[DeafBL]
+        RespiratorBL[RespiratorBL]
+        SupportAppBL[SupportApplicationBL]
+        HashavutBL[HashavutPaymentsBL]
+    end
+    subgraph DAL["שכבת גישה לנתונים (DAL)"]
+        RequestsDal[RequestsDal]
+        PatientDetailsDal[PatientDetailsDal]
+        BlindDal[BlindDal]
+        HashavutDal[HashavutPaymentsDal]
+    end
+    subgraph DB["בסיס נתונים (SQL Server)"]
+        CoreTables["טבלאות ליבה"]
+        ProgramTables["טבלאות תוכניות"]
+        PaymentTables["טבלאות תשלומים"]
+        LookupTables["טבלאות קוד"]
+    end
+    subgraph External["מערכות חיצוניות"]
+        Merkava["מערכת מרכבה (ERP)"]
+        Marganit["מערכת מרגנית"]
+    end
+    UI --> BL
+    BL --> DAL
+    DAL --> DB
+    SupportAppBL -.->|"ממשק תובחה"| Merkava
+    PatientDetailsBL -.->|"מספר אישי"| Marganit
+</div>
+
+<hr>
+
+<h2>תרשים תהליך עיבוד תשלום</h2>
+<div class="mermaid">
+flowchart TD
+    A[קליטת בקשה חדשה] --> B{בדיקת זכאות}
+    B -->|זכאי| C[קביעת סוג עזרה - TAB_AID_TYPE]
+    B -->|לא זכאי| D[עדכון סיבת אי-זכאות]
+    C --> E[חישוב סכום תשלום - TAB_AID_TYPE_TOTAL]
+    E --> F[שיוך סעיף תקציבי]
+    F --> G{סוג תשלום?}
+    G -->|חשבות - מרכבה| H[יצירת בקשת תמיכה - APP_SUPPORT_APPLICATION]
+    G -->|מטש - ישיר| I[תשלום מטש - APP_MATTAS_PAYMENTS]
+    H --> J[שליחה למרכבה - TovchaProcess]
+    J --> K{סטטוס מרכבה?}
+    K -->|אושר| L[עדכון תשלום חשבות - APP_HASHAVUT_PAYMENTS]
+    K -->|נדחה| M[עדכון שגיאה - ErrorHizon]
+    I --> N[עדכון סטטוס תשלום]
+    L --> N
+    N --> O[גיבוי - APP_REQUESTS_BACKUP]
+</div>
+
+<hr>
+
+<h2>תרשים קשרי מפתחות</h2>
+<div class="mermaid">
+graph LR
+    subgraph Patient["מטופל"]
+        PD[APP_PATIENT_DETAILS]
+    end
+    subgraph Programs["תוכניות ייעודיות"]
+        BL[BLIND - עיוורים]
+        DF[DEAF - חירשים]
+        RS[RESPIRATOR - מונשמים]
+        BD[BLIND_DOG - כלב נחייה]
+    end
+    subgraph Requests["בקשות ותשלומים"]
+        RQ[APP_REQUESTS]
+        SA[APP_SUPPORT_APPLICATION]
+        HP[APP_HASHAVUT_PAYMENTS]
+        MP[APP_MATTAS_PAYMENTS]
+    end
+    subgraph Lookups["טבלאות קוד"]
+        RP[TAB_RELATED_PROGRAMS]
+        AT[TAB_AID_TYPE]
+        PS[T_PAYMENT_STATUS]
+        RS2[T_REQUEST_STATUS]
+        ED[T_ENTITLEMENT_DECISION]
+    end
+    PD -->|"1:N"| RQ
+    PD -->|"1:1"| BL
+    PD -->|"1:1"| DF
+    PD -->|"1:1"| RS
+    PD -->|"1:1"| BD
+    RQ -->|"N:1"| RP
+    RQ -->|"N:1"| AT
+    RQ -->|"N:1"| PS
+    RQ -->|"N:1"| RS2
+    RQ -->|"N:1"| ED
+    RQ -->|"1:1"| SA
+    RQ -->|"1:1"| HP
+    RQ -->|"1:1"| MP
+    AT -->|"1:N"| MP
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad: true, theme: 'default', securityLevel: 'loose'});</script>
+</body>
+</html>
