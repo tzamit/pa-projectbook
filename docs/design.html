@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מסמך עיצוב - תיעוד מערכת PaymentsAid</title>
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.7;
+  color: #1a1a2e;
+  background: #f8f9fa;
+  padding: 40px 20px;
+  direction: rtl;
+  max-width: 960px;
+  margin: 0 auto;
+}
+h1, h2, h3, h4, h5, h6 {
+  color: #16213e;
+  margin: 1.5em 0 0.5em;
+  line-height: 1.3;
+}
+h1 { font-size: 2em; border-bottom: 3px solid #0f3460; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.2em; }
+h3 { font-size: 1.25em; color: #0f3460; }
+h4 { font-size: 1.1em; }
+p { margin: 0.8em 0; }
+a { color: #0f3460; text-decoration: underline; }
+code {
+  background: #e8edf3;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.9em;
+}
+pre {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1em 0;
+  direction: ltr;
+  text-align: left;
+}
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: 0.85em;
+}
+.table-wrapper {
+  overflow-x: auto;
+  margin: 1em 0;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9em;
+}
+th, td {
+  border: 1px solid #cbd5e0;
+  padding: 8px 12px;
+  text-align: right;
+}
+th {
+  background: #0f3460;
+  color: white;
+  font-weight: 600;
+}
+tr:nth-child(even) { background: #f1f5f9; }
+tr:hover { background: #e2e8f0; }
+ul {
+  margin: 0.5em 0 0.5em 0;
+  padding-right: 2em;
+}
+li { margin: 0.3em 0; }
+hr {
+  border: none;
+  border-top: 2px solid #e2e8f0;
+  margin: 2em 0;
+}
+strong { color: #0f3460; }
+em { font-style: italic; }
+pre.mermaid {
+  background: white;
+  color: #333;
+  text-align: center;
+  direction: ltr;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+.mermaid-container {
+  background: white;
+  text-align: center;
+  direction: ltr;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+.mermaid-loading {
+  color: #999;
+  font-style: italic;
+  padding: 2em;
+}
+@media print {
+  body { padding: 20px; background: white; }
+  pre { background: #f0f0f0; color: #333; }
+  th { background: #333; }
+}
+</style>
+</head>
+<body>
+<h1 id="מסמך-עיצוב-תיעוד-מערכת-paymentsaid">מסמך עיצוב - תיעוד מערכת PaymentsAid</h1>
+
+<h2 id="סקירה-כללית-overview-">סקירה כללית (Overview)</h2>
+
+<p>מערכת PaymentsAid היא אפליקציית Windows Forms בשפת C# (.NET Framework 2.0) המנהלת תשלומי סיוע לאוכלוסיות מיוחדות במשרד הרווחה (מוסא). המערכת בנויה בארכיטקטורת 3-Tier קלאסית עם ארבעה פרויקטים נפרדים:</p>
+
+<ul>
+  <li><strong>PaymentsAid</strong> (UI) - שכבת ממשק המשתמש, <code>Mosa.PaymentsAid.Win</code></li>
+  <li><strong>PaymentsAidBL</strong> (Business Logic) - שכבת הלוגיקה העסקית, <code>Mosa.PaymentsAid.BL</code></li>
+  <li><strong>PaymentsAidBO</strong> (Business Objects) - שכבת האובייקטים העסקיים, <code>Mosa.PaymentsAid.BO</code></li>
+  <li><strong>PaymentsAidDAL</strong> (Data Access Layer) - שכבת גישה לנתונים, <code>Mosa.PaymentsAid.Dal</code></li>
+</ul>
+
+<p>המערכת מטפלת בחמש תוכניות סיוע: עיוורים (5), חירשים (6), מונשמים (7), כלבי נחייה (8), וטלפון לחירשים (9). היא מתממשקת עם מערכות חיצוניות: מרכבה (ERP ממשלתי), חשבות, מט"ס, וחסמות (שירות Web לבדיקת זכאויות).</p>
+
+<h2 id="ארכיטקטורה-architecture-">ארכיטקטורה (Architecture)</h2>
+
+<h3 id="דיאגרמת-שכבות-ותלויות">דיאגרמת שכבות ותלויות</h3>
+
+<div class="mermaid-container" data-mermaid="Z3JhcGggVEINCiAgICBzdWJncmFwaCAi16nXm9eR16ogVUkgLSBQYXltZW50c0FpZCINCiAgICAgICAgVUlbUGF5bWVudHNBaWQ8YnIvPldpbkV4ZTxici8+TW9zYS5QYXltZW50c0FpZC5XaW5dDQogICAgZW5kDQoNCiAgICBzdWJncmFwaCAi16nXm9eR16og15zXldeS15nXp9eUINei16HXp9eZ16ogLSBQYXltZW50c0FpZEJMIg0KICAgICAgICBCTFtQYXltZW50c0FpZEJMPGJyLz5MaWJyYXJ5PGJyLz5Nb3NhLlBheW1lbnRzQWlkLkJMXQ0KICAgIGVuZA0KDQogICAgc3ViZ3JhcGggItep15vXkdeqINeQ15XXkdeZ15nXp9eY15nXnSDXoteh16fXmdeZ150gLSBQYXltZW50c0FpZEJPIg0KICAgICAgICBCT1tQYXltZW50c0FpZEJPPGJyLz5MaWJyYXJ5PGJyLz5Nb3NhLlBheW1lbnRzQWlkLkJPXQ0KICAgIGVuZA0KDQogICAgc3ViZ3JhcGggItep15vXkdeqINeS15nXqdeUINec16DXqteV16DXmdedIC0gUGF5bWVudHNBaWREQUwiDQogICAgICAgIERBTFtQYXltZW50c0FpZERBTDxici8+TGlicmFyeTxici8+TW9zYS5QYXltZW50c0FpZC5EYWxdDQogICAgZW5kDQoNCiAgICBzdWJncmFwaCAi157Xoteo15vXldeqINeX15nXpteV16DXmdeV16oiDQogICAgICAgIERCWyhTUUwgU2VydmVyPGJyLz5TQV9SU0FfUEFZTUVOVFNfQUlEKV0NCiAgICAgICAgTU9TQV9EQlsoU1FMIFNlcnZlcjxici8+TU9TQV9HRU5FUkFMX0RBVEEpXQ0KICAgICAgICBNRVJLQVZBW9ee16jXm9eR15QgRVJQXQ0KICAgICAgICBIQVNBTU9UW9eX16HXnteV16ogV2ViIFNlcnZpY2VdDQogICAgICAgIEhBU0hBVlVUW9eX16nXkdeV16pdDQogICAgICAgIE1BVFRBU1vXnteYI3F1b3Q716FdDQogICAgICAgIEFEW0FjdGl2ZSBEaXJlY3RvcnldDQogICAgICAgIFNTUlNbU1NSUyBSZXBvcnQgU2VydmVyXQ0KICAgIGVuZA0KDQogICAgVUkgLS0+fFByb2plY3RSZWZlcmVuY2V8IEJMDQogICAgVUkgLS0+fFByb2plY3RSZWZlcmVuY2V8IEJPDQogICAgVUkgLS0+fFByb2plY3RSZWZlcmVuY2V8IERBTA0KICAgIEJMIC0tPnxQcm9qZWN0UmVmZXJlbmNlfCBCTw0KICAgIEJMIC0tPnxQcm9qZWN0UmVmZXJlbmNlfCBEQUwNCiAgICBCTyAtLT58UHJvamVjdFJlZmVyZW5jZXwgREFMDQoNCiAgICBEQUwgLS0+fFR5cGVkIERhdGFTZXQgKyBTUHwgREINCiAgICBVSSAtLT58TW9zYUdlbmVyYWxEYXRhIERMTHN8IE1PU0FfREINCiAgICBVSSAtLT58VG92Y2hhIFByb2Nlc3N8IE1FUktBVkENCiAgICBVSSAtLT58U09BUCBXZWIgU2VydmljZXwgSEFTQU1PVA0KICAgIFVJIC0tPnxFeHBvcnQgRmlsZXN8IEhBU0hBVlVUDQogICAgVUkgLS0+fEV4cG9ydCBGaWxlc3wgTUFUVEFTDQogICAgVUkgLS0+fFdpbmRvd3NJZGVudGl0eXwgQUQNCiAgICBVSSAtLT58UmVwb3J0Vmlld2VyfCBTU1JTDQ=="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h3 id="דיאגרמת-זרימת-נתונים-בין-שכבות">דיאגרמת זרימת נתונים בין שכבות</h3>
+
+<div class="mermaid-container" data-mermaid="c2VxdWVuY2VEaWFncmFtDQogICAgcGFydGljaXBhbnQgVUkgYXMgVUkgTGF5ZXI8YnIvPihXaW5kb3dzIEZvcm1zKQ0KICAgIHBhcnRpY2lwYW50IEJMIGFzIEJMIExheWVyPGJyLz4oQnVzaW5lc3MgTG9naWMpDQogICAgcGFydGljaXBhbnQgQk8gYXMgQk8gTGF5ZXI8YnIvPihCdXNpbmVzcyBPYmplY3RzKQ0KICAgIHBhcnRpY2lwYW50IERBTCBhcyBEQUwgTGF5ZXI8YnIvPihEYXRhIEFjY2VzcykNCiAgICBwYXJ0aWNpcGFudCBEQiBhcyBTUUwgU2VydmVyDQoNCiAgICBVSS0+PkJMOiDXp9eo15nXkNeUINec157XqteV15PXqiBTZWxlY3QvSW5zZXJ0L1VwZGF0ZQ0KICAgIEJMLT4+REFMOiDXmdem15nXqNeqIFRhYmxlQWRhcHRlcg0KICAgIERBTC0+PkRCOiDXlNek16LXnNeqIFN0b3JlZCBQcm9jZWR1cmUNCiAgICBEQi0tPj5EQUw6IERhdGFUYWJsZSAo16rXldem15DXldeqKQ0KICAgIERBTC0tPj5CTDogRGF0YVRhYmxlDQogICAgQkwtPj5CTzogQmFzZUVudGl0eS5Qb3B1bGF0ZUxpc3Q8VD4oRGF0YVRhYmxlKQ0KICAgIEJPLS0+PkJMOiBMaXN0PFQ+ICjXqNep15nXnteqINeQ15XXkdeZ15nXp9eY15nXnSkNCiAgICBCTC0tPj5VSTogTGlzdDxUPiAvINeQ15XXkdeZ15nXp9eYINeR15XXk9eTDQogICAgVUktPj5VSTog15TXpteS15Qg15EtRGF0YUdyaWRWaWV3IC8g16TXp9eT15nXnQ0="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h3 id="תבנית-ירושה-bl-bo">תבנית ירושה BL ← BO</h3>
+
+<p>תבנית ייחודית במערכת: כל מחלקת BL יורשת מהמחלקת BO המתאימה. לדוגמה:</p>
+
+<pre><code>PatientDetailsBL : PatientDetails : BaseEntity
+RequestsBL : Requests : BaseEntity
+BlindBL : Blind : BaseEntity</code></pre>
+
+<p>כך מחלקת BL מכילה גם את השדות העסקיים (מ-BO) וגם את הלוגיקה העסקית (Select, Insert, Update, Delete).</p>
+
+
+<h3 id="ספריות-חיצוניות-dll-references-">ספריות חיצוניות (DLL References)</h3>
+
+<p>שכבת UI מתייחסת לספריות חיצוניות הבאות (מתיקיית <code>DLL\</code>):</p>
+<ul>
+  <li><strong>MosaGeneralDataBL/BO/Dal</strong> - נתונים כלליים של מוסא (רשויות, ערים)</li>
+  <li><strong>ActiveReports3</strong> - מנוע דוחות ActiveReports</li>
+  <li><strong>Microsoft.ReportViewer.WinForms/Common/WebForms</strong> - הצגת דוחות SSRS</li>
+  <li><strong>XPCommonControls</strong> - פקדי UI מותאמים (XPTaskBox, XPLinkedLabel)</li>
+  <li><strong>System.DirectoryServices</strong> - אימות Active Directory</li>
+  <li><strong>System.Web.Services</strong> - גישה לשירות Web של חסמות</li>
+</ul>
+
+<h2 id="רכיבים-וממשקים-components-and-interfaces-">רכיבים וממשקים (Components and Interfaces)</h2>
+
+<h3 id="1-נקודת-כניסה-program-cs">1. נקודת כניסה - Program.cs</h3>
+
+<div class="mermaid-container" data-mermaid="Zmxvd2NoYXJ0IFREDQogICAgU1RBUlQoW9eU16TXotec16og15DXpNec15nXp9em15nXlF0pIC0tPiBDSEVDS19JTlNUQU5DRVtDaGVja0ZvclByZXZpb3VzSW5zdGFuY2U8YnIvPtee16DXmdei16og15TXpNei15zXlCDXm9ek15XXnNeUXQ0KICAgIENIRUNLX0lOU1RBTkNFIC0tPiBHRVRfVVNFUltXaW5kb3dzSWRlbnRpdHkuR2V0Q3VycmVudDxici8+15bXmdeU15XXmSDXntep16rXntepXQ0KICAgIEdFVF9VU0VSIC0tPiBDSEVDS19WSUVXe0FWT0RBX05UXFNpeW9hUj99DQogICAgQ0hFQ0tfVklFVyAtLT5815vXn3wgU0VUX1ZJRVdbdXNlckdyb3VwID0gVmlld10NCiAgICBDSEVDS19WSUVXIC0tPnzXnNeQfCBDSEVDS19XUklURXtBVk9EQV9OVFxTaXlvYVdyaXRlP30NCiAgICBTRVRfVklFVyAtLT4gQ0hFQ0tfV1JJVEUNCiAgICBDSEVDS19XUklURSAtLT5815vXn3wgU0VUX1JVTlt1c2VyR3JvdXAgPSBSdW5dDQogICAgQ0hFQ0tfV1JJVEUgLS0+fNec15B8IENIRUNLX0dST1VQe9eZ16kg15TXqNep15DXlD99DQogICAgU0VUX1JVTiAtLT4gQ0hFQ0tfR1JPVVANCiAgICBDSEVDS19HUk9VUCAtLT5815zXkHwgRVhJVChb15nXpteZ15DXlCDXnteZ15nXk9eZ16pdKQ0KICAgIENIRUNLX0dST1VQIC0tPnzXm9effCBDUkVBVEVfRElSW9eZ16bXmdeo16og16rXmden15nXmdeqIE91dHB1dF0NCiAgICBDUkVBVEVfRElSIC0tPiBSVU5fQVBQW0FwcGxpY2F0aW9uLlJ1biAtIE1haW5Gb3JtXQ0="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h3 id="2-מסך-ראשי-mainform-mdi-container-">2. מסך ראשי - MainForm (MDI Container)</h3>
+
+<p>MainForm הוא טופס MDI עם SplitContainer:</p>
+<ul>
+  <li><strong>Panel1 (שמאל)</strong>: פאנל ניווט עם קישורים (XPLinkedLabel)</li>
+  <li><strong>Panel2 (ימין)</strong>: אזור תוכן לטפסי בנים</li>
+</ul>
+
+<p>קישורי ניווט:</p>
+<div class="table-wrapper"><table>
+  <tr>
+    <th>קישור</th>
+    <th>טופס</th>
+    <th>הרשאה נדרשת</th>
+  </tr>
+  <tr>
+    <td>הכנת עיבוד</td>
+    <td><code>RequestForm</code></td>
+    <td>Run בלבד</td>
+  </tr>
+  <tr>
+    <td>תשלום רטרואקטיבי</td>
+    <td><code>RetroPaymentForm</code></td>
+    <td>View/Run</td>
+  </tr>
+  <tr>
+    <td>דוחות</td>
+    <td><code>Reports</code></td>
+    <td>View/Run</td>
+  </tr>
+  <tr>
+    <td>שאילתות</td>
+    <td><code>QueryForm</code></td>
+    <td>View/Run</td>
+  </tr>
+  <tr>
+    <td>היסטוריית רטרו</td>
+    <td><code>RetroPaymentHistory</code></td>
+    <td>View/Run</td>
+  </tr>
+  <tr>
+    <td>עדכון תעריפים</td>
+    <td><code>TaarifimForm</code></td>
+    <td>View/Run</td>
+  </tr>
+</table></div>
+
+<p>כאשר טופס-בן נפתח, Panel1 מנוטרל. כאשר הטופס נסגר, Panel1 מופעל מחדש.</p>
+
+<h3 id="3-טופס-עיבוד-שוטף-requestform">3. טופס עיבוד שוטף - RequestForm</h3>
+
+<p>זהו הרכיב המרכזי של המערכת. מבצע עיבוד רב-שלבי:</p>
+
+<div class="mermaid-container" data-mermaid="Zmxvd2NoYXJ0IFREDQogICAgUzBb16nXnNeRIDA6INen15nXk9eV150g15fXldeT16kg16LXmdeR15XXkzxici8+UHJvbW90aW9uTW9udGhQcm9jZXNzaW5nU3RlcDBdDQogICAgUzFb16nXnNeRIDE6INeR15PXmden16og157XmNeV16TXnNeZ1508YnIvPkNoZWNrUGF0aWVudHNGb3JDdXJyZW50UHJvY2Vzc2luZ1N0ZXAxXQ0KICAgIFMyW9ep15zXkSAyOiDXkdeZ16bXldeiINei15nXkdeV15Mv15fXmdep15XXkTxici8+UHJvY2Vzc1N0ZXAyXQ0KICAgIFMzW9ep15zXkSAzOiDXlNei15HXqNeqINeR16fXqdeV16og16rXnteZ15vXlCDXnNee16jXm9eR15Q8YnIvPlRyYW5zZmVyUmVxdWVzdEZvck1lcmthdmFTdGVwM10NCiAgICBTNFvXqdec15EgNDog15HXk9eZ16fXqiDXodeY15jXldehINeR16fXqdeV16og16rXnteZ15vXlDxici8+Q2hlY2tpbmdQcm9jZXNzaW5nUmVxdWVzdHNGb3JNb250aFN0ZXA0XQ0KICAgIFM1W9ep15zXkSA1OiDXlNei15HXqNeqINeT16jXmdep15XXqiDXqtep15zXldedINec157XqNeb15HXlDxici8+VHJhbnNmZXJSZXF1aXJlRm9yTWVya2F2YVN0ZXA1XQ0KICAgIFM2W9ep15zXkSA2OiDXkdeT15nXp9eqINeh15jXmNeV16Eg15PXqNeZ16nXldeqINeq16nXnNeV1508YnIvPkNoZWNraW5nUHJvY2Vzc2luZ1JlcXVpcmVGb3JNb250aFN0ZXA2XQ0KICAgIEZJTEVTW9eZ15nXpteV15Ag16fXkdem15nXnTog15fXqdeR15XXqiArINee15gjcXVvdDvXoV0NCg0KICAgIFMwIC0tPiBTMQ0KICAgIFMxIC0tPiBTMg0KICAgIFMyIC0tPiBTMw0KICAgIFMzIC0tPiBTNA0KICAgIFM0IC0tPiBTNQ0KICAgIFM1IC0tPiBTNg0KICAgIFM2IC0tPiBGSUxFUw0="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h4 id="שלב-1-בדיקת-מטופלים-לפי-תוכנית-">שלב 1 - בדיקת מטופלים לפי תוכנית:</h4>
+
+<div class="table-wrapper"><table>
+  <tr>
+    <th>תוכנית</th>
+    <th>פונקציה</th>
+    <th>בדיקות עיקריות</th>
+  </tr>
+  <tr>
+    <td>עיוורים</td>
+    <td><code>CheckPationtForBlind()</code></td>
+    <td>פרטי מטופל, בנק, החלטת זכאות, גיל פנסיה, תעסוקה, חסמות</td>
+  </tr>
+  <tr>
+    <td>חירשים</td>
+    <td><code>CheckPationtForDeaf()</code></td>
+    <td>פרטי מטופל, בנק, החלטת זכאות, גיל פנסיה, תעסוקה, האם עיוור, חסמות</td>
+  </tr>
+  <tr>
+    <td>מונשמים</td>
+    <td><code>CheckPationtForRespirator()</code></td>
+    <td>פרטי מטופל, בנק, טרכאוסטומיה, ביטוח לאומי, היתר עובד זר</td>
+  </tr>
+  <tr>
+    <td>כלבי נחייה</td>
+    <td><code>CheckPationtForDogs()</code></td>
+    <td>פרטי מטופל, בנק, תאריכי תוקף כלב</td>
+  </tr>
+  <tr>
+    <td>טלפון</td>
+    <td><code>CheckPationtForPhone()</code></td>
+    <td>פרטי מטופל, בנק</td>
+  </tr>
+</table></div>
+
+<h4 id="שלב-2-חישוב-סכומים-">שלב 2 - חישוב סכומים:</h4>
+
+<div class="table-wrapper"><table>
+  <tr>
+    <th>תוכנית</th>
+    <th>פונקציה</th>
+    <th>סוגי עזרה (PaymentTypeSymbol)</th>
+  </tr>
+  <tr>
+    <td>עיוורים</td>
+    <td><code>MakeCalculationBlindNew()</code></td>
+    <td>51-עובד, 52-לא עובד, 53-מינימום, 54-פנסיה</td>
+  </tr>
+  <tr>
+    <td>חירשים</td>
+    <td><code>MakeCalculationDeafNew()</code></td>
+    <td>61-עובד, 62-לא עובד, 63-פנסיה עובד, 64-פנסיה לא עובד</td>
+  </tr>
+  <tr>
+    <td>מונשמים</td>
+    <td><code>MakeCalculationRespirationNew()</code></td>
+    <td>71-מונשם</td>
+  </tr>
+  <tr>
+    <td>כלבי נחייה</td>
+    <td><code>MakeCalculationDogBlindNew()</code></td>
+    <td>81-כלבי נחייה</td>
+  </tr>
+  <tr>
+    <td>טלפון</td>
+    <td><code>MakeCalculationPhoneBlindNew()</code></td>
+    <td>(לפי תוכנית)</td>
+  </tr>
+</table></div>
+
+<h4 id="חישוב-גיל-פנסיה-">חישוב גיל פנסיה:</h4>
+
+<pre><code>PensionAge:     גבר=67, אישה=62
+OldPensionAge:  גבר=65, אישה=60
+PensionAgeBlind: גבר=67, אישה=62</code></pre>
+
+<h3 id="4-טופס-תשלום-רטרואקטיבי-retropaymentform">4. טופס תשלום רטרואקטיבי - RetroPaymentForm</h3>
+
+<p>מאפשר תשלום עבור תקופות קודמות למטופל ספציפי:</p>
+<ul>
+  <li>חיפוש מטופל לפי סוג זהות + מספר זהות</li>
+  <li>בחירת תוכנית סיוע</li>
+  <li>בדיקת זכאות מול חסמות</li>
+  <li>חישוב סכום (<code>DoCalculationForBlind()</code>, <code>DoCalculationForDeaf()</code>)</li>
+  <li>יצירת בקשת תשלום עם <code>RequestStatus=2</code> (רטרואקטיבי)</li>
+  <li>בדיקה שהעיבוד השוטף הושלם (<code>checkIfIbudIsDone()</code>)</li>
+</ul>
+
+<h3 id="5-טופס-ביטול-עיבוד-cancelibud">5. טופס ביטול עיבוד - CancelIbud</h3>
+
+<div class="mermaid-container" data-mermaid="Zmxvd2NoYXJ0IFREDQogICAgU1RBUlQoW9eR15nXmNeV15wg16LXmdeR15XXk10pIC0tPiBUWVBFe9eh15XXkiDXkdeZ15jXldecP30NCiAgICBUWVBFIC0tPnzXntec15B8IENIRUNLX0ZVTExbY2hlY2tDYW5jZWxhdGlvbjxici8+15HXk9eZ16fXqiDXkdeZ15jXldecINen15XXk9edXQ0KICAgIFRZUEUgLS0+fNec157XmNeV16TXnHwgRklORFvXl9eZ16TXldepINee15jXldek15w8YnIvPtec16TXmSDXqi7Xll0NCiAgICBDSEVDS19GVUxMIC0tPnzXnNeQINeR15XXmNecfCBGVUxMW01ha2VGdWxsQ2FuY2VsYXRpb248YnIvPlJlcXVlc3RzQkwuQ2FuY2VsSWJ1ZF0NCiAgICBDSEVDS19GVUxMIC0tPnzXm9eR16gg15HXldeY15x8IFdBUk5b15TXldeT16LXqiDXkNeW15TXqNeUXQ0KICAgIEZJTkQgLS0+IFBBVElFTlRfQ0FOQ0VMW01ha2VQYXRpb25DYW5jZWxhdGlvbjxici8+UmVxdWVzdHNCTC5DYW5jZWxJYnVkRm9yUGF0aW9uXQ0="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h3 id="6-ממשק-מרכבה-merkava-interface-">6. ממשק מרכבה (Merkava Interface)</h3>
+
+<div class="mermaid-container" data-mermaid="c2VxdWVuY2VEaWFncmFtDQogICAgcGFydGljaXBhbnQgUEEgYXMgUGF5bWVudHNBaWQNCiAgICBwYXJ0aWNpcGFudCBUSSBhcyBUaW1pbmdJbnRlcmZhY2UNCiAgICBwYXJ0aWNpcGFudCBNSyBhcyDXnteo15vXkdeUIEVSUA0KDQogICAgTm90ZSBvdmVyIFBBLE1LOiDXqdec15EgMyAtINeU16LXkdeo16og15HXp9ep15XXqiDXqtee15nXm9eUDQogICAgUEEtPj5USTog15nXpteZ16jXqiDXqNep15XXnteqIFRpbWluZ0ludGVyZmFjZTxici8+U2VuZFN5c3RlbT03LCBSZWNlaXZlU3lzdGVtPTY8YnIvPkludGVyZmFjZUNvZGU9MTIgKFN1cHBvcnQpDQogICAgUEEtPj5QQTogSW5zZXJ0VXBkYXRlU3Vwb3J0QXBwbGljdGlvbjxici8+15nXpteZ16jXqiBTdXBwb3J0QXBwbGljYXRpb24NCiAgICBQQS0+Pk1LOiDXqteU15zXmdeaINeq15XXkdeX15QgKFRvdmNoYSkNCg0KICAgIE5vdGUgb3ZlciBQQSxNSzog16nXnNeRIDQgLSDXkdeT15nXp9eqINeh15jXmNeV16ENCiAgICBQQS0+Pk1LOiDXqdec15nXpNeqINeh15jXmNeV16Eg15fXmdeW15XXnw0KICAgIE1LLS0+PlBBOiBBcHBsaWNhdGlvbk1lcmthdmFTdGF0dXNIaXp1bjxici8+KyBNZXJrYXZhVm91Y2hlcg0KDQogICAgTm90ZSBvdmVyIFBBLE1LOiDXqdec15EgNSAtINeU16LXkdeo16og15PXqNeZ16nXldeqINeq16nXnNeV150NCiAgICBQQS0+PlRJOiBUaW1pbmdJbnRlcmZhY2U8YnIvPkludGVyZmFjZUNvZGU9MTMgKFJlcXVlc3QpDQogICAgUEEtPj5QQTog15nXpteZ16jXqiBIYXNoYXZ1dFBheW1lbnRzDQogICAgUEEtPj5NSzog16rXlNec15nXmiDXqteV15HXl9eUDQoNCiAgICBOb3RlIG92ZXIgUEEsTUs6INep15zXkSA2IC0g15HXk9eZ16fXqiDXodeY15jXldehINeT16jXmdep15XXqg0KICAgIFBBLT4+TUs6INep15zXmdek16og16HXmNeY15XXoSDXl9eZ15bXldefDQogICAgTUstLT4+UEE6IFBheW1lbnRSZXFNZXJrYXZhU3RhdHVzSGl6b248YnIvPisgTWVya2F2YUVycm9yRGVzYw0="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h3 id="7-ממשק-חסמות-hasamot-web-service-">7. ממשק חסמות (Hasamot Web Service)</h3>
+
+<ul>
+  <li>כתובת: <code>http://adabas/MosaIntegrationWS/Hasamot.asmx</code></li>
+  <li>מתודה: <code>CheckEntitlementFromHasamot(Requests request)</code></li>
+  <li>מחזיר: <code>HasamaWithMisgeretInfo</code> - מידע על הסמכה רפואית ומסגרת</li>
+  <li>משמש בשלב 1 של העיבוד השוטף ובתשלום רטרואקטיבי</li>
+</ul>
+
+<h3 id="8-ייצוא-קבצי-תשלום">8. ייצוא קבצי תשלום</h3>
+
+<div class="table-wrapper"><table>
+  <tr>
+    <th>פונקציה</th>
+    <th>תוכנית</th>
+    <th>מערכת יעד</th>
+    <th>פורמט</th>
+  </tr>
+  <tr>
+    <td><code>ExportFileHashavut()</code></td>
+    <td>עיוורים, כלבי נחייה</td>
+    <td>חשבות</td>
+    <td>קובץ טקסט בפורמט קבוע</td>
+  </tr>
+  <tr>
+    <td><code>ExportFileHashavutRespiration()</code></td>
+    <td>מונשמים</td>
+    <td>חשבות</td>
+    <td>קובץ טקסט בפורמט קבוע</td>
+  </tr>
+  <tr>
+    <td><code>ExportFileMattasBlind()</code></td>
+    <td>עיוורים</td>
+    <td>מט"ס</td>
+    <td>קובץ טקסט בפורמט קבוע</td>
+  </tr>
+  <tr>
+    <td><code>ExportFileMattasDeaf()</code></td>
+    <td>חירשים</td>
+    <td>מט"ס</td>
+    <td>קובץ טקסט בפורמט קבוע</td>
+  </tr>
+</table></div>
+
+<p>קבצים נשמרים בתיקיית <code>Output\</code> שנוצרת אוטומטית בהפעלה.</p>
+
+<h3 id="9-מערכת-דוחות">9. מערכת דוחות</h3>
+
+<ul>
+  <li>שימוש ב-<code>Microsoft.ReportViewer.WinForms</code> להצגת דוחות SSRS</li>
+  <li>שרת דוחות מוגדר ב-app.config: <code>ReportServer</code>, <code>ReportPath</code></li>
+  <li><code>GeneralFunc.RenderProblemPatientReport()</code> - רינדור דוח מטופלים בעייתיים</li>
+  <li><code>GeneralFunc.SendMailNegativeRequestReport()</code> - שליחת דוח בקשות שליליות</li>
+  <li><code>GeneralFunc.SendMailForDoublePayments()</code> - שליחת התראת תשלומים כפולים בפורמט HTML</li>
+</ul>
+
+<h3 id="10-מערכת-דואר-אלקטרוני-mailhelper">10. מערכת דואר אלקטרוני - MailHelper</h3>
+
+<ul>
+  <li>שליחה באמצעות SMTP (<code>SmtpClient</code>)</li>
+  <li>כתובת שולח: <code>MerkavaTovchaUser@molsa.gov.il</code></li>
+  <li>תמיכה ברינדור דוחות SSRS ל-PDF וצירוף למייל</li>
+  <li>שמירת רשומת מייל ב-DB: <code>MailsBL.InsertMails()</code></li>
+  <li>שמירת קבצים מצורפים: <code>MailsAttachmentsBL.InsertUpdateMailsAttachments()</code></li>
+  <li>כתובות התראה מוגדרות ב-app.config:</li>
+  <li><code>MailAdress</code> - כתובת כללית</li>
+  <li><code>DoublePaymentsProgram5And8MailAdress</code> - תשלומים כפולים עיוורים+כלבים</li>
+  <li><code>DoublePaymentsProgram6MailAdress</code> - תשלומים כפולים חירשים</li>
+</ul>
+
+
+<h2 id="מודל-נתונים-data-models-">מודל נתונים (Data Models)</h2>
+
+<h3 id="דיאגרמת-ישויות-עסקיות">דיאגרמת ישויות עסקיות</h3>
+
+<div class="mermaid-container" data-mermaid="Y2xhc3NEaWFncmFtDQogICAgY2xhc3MgQmFzZUVudGl0eSB7DQogICAgICAgIDw8YWJzdHJhY3Q+Pg0KICAgICAgICArc3RyaW5nIEVycm9yU3RyaW5nDQogICAgICAgICtib29sIElzQ2hhbmdlZA0KICAgICAgICArc3RyaW5nIFNvcnRlZFByb3BlcnR5DQogICAgICAgICtQb3B1bGF0ZUZyb21EYXRhUm93KERhdGFSb3cgZHIpKg0KICAgICAgICArUG9wdWxhdGVMaXN0flR+KERhdGFUYWJsZSBkdCkkIExpc3R+VH4NCiAgICAgICAgK0dldE51bGxhYmxlVmFsdWVGcm9tQ29sdW1+VH4oRGF0YVJvdywgc3RyaW5nKSBUDQogICAgICAgICtHZXRWYWx1ZUZyb21Db2x1bX5UfihvYmplY3QpIFQNCiAgICAgICAgK0NyZWF0ZUVudGl0eUZyb21EYXRhUm93flR+KERhdGFSb3cpJCBUDQogICAgICAgICtDcmVhdGVFbnRpdHlGcm9tRGF0YVRhYmxlflR+KERhdGFUYWJsZSkkIFQNCiAgICB9DQoNCiAgICBjbGFzcyBQYXRpZW50RGV0YWlscyB7DQogICAgICAgICtpbnQgSURUeXBlDQogICAgICAgICtzdHJpbmcgUGF0aWVudElEDQogICAgICAgICtpbnQgUHJvZ3JhbVN5bWJvbA0KICAgICAgICArc3RyaW5nIFBhdGllbnRGaXJzdE5hbWUNCiAgICAgICAgK3N0cmluZyBQYXRpZW50TGFzdE5hbWUNCiAgICAgICAgK2ludCBQYXRpZW50R2VuZGVyDQogICAgICAgICtEYXRlVGltZSBQYXRpZW50QmlydGhEYXRlDQogICAgICAgICtzdHJpbmcgUGF0aWVudEFkZHJlc3MNCiAgICAgICAgK3N0cmluZyBQYXRpZW50Q2l0eVN5bWJvbA0KICAgICAgICAraW50IFBhdGllbnRaaXBDb2QNCiAgICAgICAgK2ludCBBdXRob3JpdHkNCiAgICAgICAgK2ludCBQYXRpZW50QmFuaw0KICAgICAgICAraW50IFBhdGllbnRCcmFuY2gNCiAgICAgICAgK3N0cmluZyBQYXRpZW50QmFua0FjY291bnQNCiAgICAgICAgK2ludCBNYXJnYW5pdA0KICAgICAgICAraW50IFBhdGllbnRNZXJrYXZhU3RhdHVzDQogICAgICAgICtpbnQgUGF0aWVudE1lcmthdmFOdW0NCiAgICAgICAgK3N0cmluZyBQZW5zaW9uUmVzaXZlSUQNCiAgICAgICAgK3N0cmluZyBQZW5zaW9uUmVzaXZlRmlyc3ROYW1lDQogICAgICAgICtzdHJpbmcgUGVuc2lvblJlc2l2ZUxhc3ROYW1lDQogICAgfQ0KDQogICAgY2xhc3MgUmVxdWVzdHMgew0KICAgICAgICAraW50IElEVHlwZQ0KICAgICAgICArc3RyaW5nIFBhdGllbnRJRA0KICAgICAgICAraW50IFByb2dyYW1TeW1ib2wNCiAgICAgICAgK3N0cmluZyBNb250aFJlcG9ydA0KICAgICAgICArc3RyaW5nIE1vbnRoUHJvY2Vzc2luZw0KICAgICAgICAraW50IFJlcXVlc3RTdGF0dXMNCiAgICAgICAgK2ludCBQYXltZW50U3RhdHVzDQogICAgICAgICtkb3VibGUgVG90YWxQYXltZW50DQogICAgICAgICtpbnQgQWlkVHlwZVN5bWJvbA0KICAgICAgICAraW50IFRha3ppdkNsYXNzaWZpYw0KICAgICAgICArc3RyaW5nIFNlaWZUYWt6aXZpDQogICAgICAgICtpbnQgTWVya2F2YVN0YXR1c0hpem9uDQogICAgfQ0KDQogICAgY2xhc3MgU3VwcG9ydEFwcGxpY2F0aW9uIHsNCiAgICAgICAgK2ludCBTdXBwb3J0QXBwbGljYXRpb25JZA0KICAgICAgICArc3RyaW5nIFBhdGludElkTnVtDQogICAgICAgICtzdHJpbmcgUGF0aWVudE1lcmthdmFOdW0NCiAgICAgICAgK2ludCBQcm9ncmFtU3ltYm9sDQogICAgICAgICtpbnQgU3VwcG9ydEFwcGxpY2F0aW9uWWVhcg0KICAgICAgICArc3RyaW5nIEFwcGxpY2F0aW9uUmVjTnVtDQogICAgICAgICtzdHJpbmcgUmVmZXJlbmNlTnVtYmVyDQogICAgICAgICtzdHJpbmcgVGFrYW5hDQogICAgICAgICtzdHJpbmcgRnVuZENlbnRlcg0KICAgICAgICArc3RyaW5nIEFwcGxpY2F0aW9uVG90YWxFeHBlbnNlDQogICAgICAgICtpbnQgQXBwbGljYXRpb25NZXJrYXZhU3RhdHVzSGl6dW4NCiAgICAgICAgK3N0cmluZyBNZXJrYXZhVm91Y2hlcg0KICAgICAgICArc3RyaW5nIEVycm9yRmlsZWREZXNjDQogICAgICAgICtzdHJpbmcgRXJyb3JEZXNjDQogICAgfQ0KDQogICAgY2xhc3MgSGFzaGF2dXRQYXltZW50cyB7DQogICAgICAgICtpbnQgSURUeXBlDQogICAgICAgICtzdHJpbmcgUGF0aWVudElEDQogICAgICAgICtpbnQgUHJvZ3JhbVN5bWJvbA0KICAgICAgICArc3RyaW5nIE1vbnRoUHJvY2Vzc2luZw0KICAgICAgICArc3RyaW5nIFNlaWZUYWt6aXZpDQogICAgICAgICtkb3VibGUgU2NodW1OZXRvDQogICAgICAgICtkb3VibGUgU2NodW1TaG90ZWYNCiAgICAgICAgK2RvdWJsZSBTY2h1bVJldHJvDQogICAgICAgICtzdHJpbmcgVGFrYW5hDQogICAgICAgICtzdHJpbmcgRnVuZENlbnRlcg0KICAgICAgICArc3RyaW5nIFBheW1lbnRSZXFOdW0NCiAgICAgICAgK2ludCBQYXltZW50UmVxTWVya2F2YVN0YXR1c0hpem9uDQogICAgICAgICtzdHJpbmcgTWVya2F2YUVycm9yRGVzYw0KICAgIH0NCg0KICAgIGNsYXNzIE1hdHRhc1BheW1lbnRzIHsNCiAgICAgICAgK2ludCBJRFR5cGUNCiAgICAgICAgK3N0cmluZyBQYXRpZW50SUQNCiAgICAgICAgK2ludCBQcm9ncmFtU3ltYm9sDQogICAgICAgICtzdHJpbmcgTW9udGhQcm9jZXNzaW5nDQogICAgICAgICtkb3VibGUgVG90YWxQYXltZW50DQogICAgICAgICtzdHJpbmcgUXVhbGl0eU5lZWQNCiAgICAgICAgK2ludCBBaWRUeXBlU3ltYm9sDQogICAgICAgICtpbnQgVGFreml2Q2xhc3NpZmljDQogICAgfQ0KDQogICAgY2xhc3MgQmxpbmQgew0KICAgICAgICAraW50IEVtcGxveWVlU3RhdHVzDQogICAgICAgICtpbnQgRW50aXRsZW1lbnREZWNpc2lvbg0KICAgICAgICArRGF0ZVRpbWUgRWxpZ2libGVEYXRlQWNjb21wYW55aW5nDQogICAgICAgICtEYXRlVGltZSBTdGFydERhdGVSaWdodA0KICAgICAgICArRGF0ZVRpbWUgRGF0ZVN0YXJ0V29ya2luZw0KICAgICAgICArRGF0ZVRpbWUgRGF0ZUVuZFdvcmtpbmcNCiAgICAgICAgK2ludCBTaGFyYW0NCiAgICAgICAgK2ludCBEZWFmDQogICAgICAgICtzdHJpbmcgUHJvYmxlbVJlYXNvbg0KICAgIH0NCg0KICAgIGNsYXNzIERlYWYgew0KICAgICAgICAraW50IEVtcGxveWVlU3RhdHVzDQogICAgICAgICtpbnQgRW50aXRsZW1lbnREZWNpc2lvbg0KICAgICAgICArRGF0ZVRpbWUgRWxpZ2libGVEYXRlQWNjb21wYW55aW5nDQogICAgICAgICtEYXRlVGltZSBTdGFydERhdGVSaWdodA0KICAgICAgICArRGF0ZVRpbWUgRGF0ZVN0YXJ0V29ya2luZw0KICAgICAgICArRGF0ZVRpbWUgRGF0ZUVuZFdvcmtpbmcNCiAgICAgICAgK2ludCBCbGluZA0KICAgICAgICArc3RyaW5nIFByb2JsZW1SZWFzb24NCiAgICB9DQoNCiAgICBjbGFzcyBSZXNwaXJhdG9yIHsNCiAgICAgICAgK2Jvb2wgSXNUcmFjaGVvc3RvbXkNCiAgICAgICAgK2Jvb2wgSXNCVExFbnRpdGxlZA0KICAgICAgICArYm9vbCBGb3JlaWduV29ya2VyUGVybWl0DQogICAgICAgICtEYXRlVGltZSBEYXRlT2ZEZWF0aA0KICAgICAgICArc2hvcnQgQmFua0FjY291bnRPd25lcg0KICAgICAgICArc3RyaW5nIFBheW1lbnRSZWNlaXZlSUQNCiAgICAgICAgK3N0cmluZyBQYXltZW50UmVjZWl2ZUZpcnN0TmFtZQ0KICAgICAgICArc3RyaW5nIFBheW1lbnRSZWNlaXZlTGFzdE5hbWUNCiAgICAgICAgK3N0cmluZyBGYXhOdW0NCiAgICAgICAgK3N0cmluZyBFbWFpbA0KICAgICAgICArc3RyaW5nIFRlbGVwaG9uZU51bQ0KICAgIH0NCg0KICAgIGNsYXNzIEJsaW5kRG9nIHsNCiAgICAgICAgK9ek16jXmNeZINee15jXldek15wNCiAgICAgICAgK9ek16jXmNeZINeR16DXpw0KICAgICAgICAr16rXkNeo15nXm9eZINeq15XXp9ejINeb15zXkQ0KICAgIH0NCg0KICAgIGNsYXNzIE1vbnRoc1Byb2Nlc3Mgew0KICAgICAgICAraW50IFByb2dyYW1TeW1ib2wNCiAgICAgICAgK3N0cmluZyBNb250aFByb2Nlc3NpbmcNCiAgICAgICAgK0RhdGVUaW1lIE1vbnRoRGF0ZVVwZGF0ZQ0KICAgIH0NCg0KICAgIGNsYXNzIFRpbWluZ0ludGVyZmFjZSB7DQogICAgICAgICtpbnQgVGltaW5nSW50ZXJmYWNlSWQNCiAgICAgICAgK2ludCBTZW5kU3lzdGVtQ29kZQ0KICAgICAgICAraW50IFJlY2VpdmVTeXN0ZW1Db2RlDQogICAgICAgICtpbnQgSW50ZXJmYWNlQ29kZQ0KICAgICAgICArRGF0ZVRpbWUgTmV4dFJ1bkRhdGUNCiAgICAgICAgK2Jvb2wgSW5Qcm9jZXNzDQogICAgfQ0KDQogICAgQmFzZUVudGl0eSA8fC0tIFBhdGllbnREZXRhaWxzDQogICAgQmFzZUVudGl0eSA8fC0tIFJlcXVlc3RzDQogICAgQmFzZUVudGl0eSA8fC0tIFN1cHBvcnRBcHBsaWNhdGlvbg0KICAgIEJhc2VFbnRpdHkgPHwtLSBIYXNoYXZ1dFBheW1lbnRzDQogICAgQmFzZUVudGl0eSA8fC0tIE1hdHRhc1BheW1lbnRzDQogICAgQmFzZUVudGl0eSA8fC0tIEJsaW5kDQogICAgQmFzZUVudGl0eSA8fC0tIERlYWYNCiAgICBCYXNlRW50aXR5IDx8LS0gUmVzcGlyYXRvcg0KICAgIEJhc2VFbnRpdHkgPHwtLSBCbGluZERvZw0KICAgIEJhc2VFbnRpdHkgPHwtLSBNb250aHNQcm9jZXNzDQogICAgQmFzZUVudGl0eSA8fC0tIFRpbWluZ0ludGVyZmFjZQ0KDQogICAgUGF0aWVudERldGFpbHMgIjEiIC0tICIqIiBSZXF1ZXN0cyA6INee15jXldek15wg4oaSINeR16fXqdeV16oNCiAgICBSZXF1ZXN0cyAiMSIgLS0gIjAuLjEiIFN1cHBvcnRBcHBsaWNhdGlvbiA6INeR16fXqdeUIOKGkiDXqtee15nXm9eUINeR157XqNeb15HXlA0KICAgIFJlcXVlc3RzICIxIiAtLSAiMC4uMSIgSGFzaGF2dXRQYXltZW50cyA6INeR16fXqdeUIOKGkiDXqtep15zXldedINeX16nXkdeV16oNCiAgICBSZXF1ZXN0cyAiMSIgLS0gIjAuLjEiIE1hdHRhc1BheW1lbnRzIDog15HXp9ep15Qg4oaSINeq16nXnNeV150g157XmCLXoQ0="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h3 id="תבנית-bl-ירושה-מ-bo">תבנית BL - ירושה מ-BO</h3>
+
+<div class="mermaid-container" data-mermaid="Y2xhc3NEaWFncmFtDQogICAgY2xhc3MgUGF0aWVudERldGFpbHMgew0KICAgICAgICAr16nXk9eV16og16DXqteV16DXmdedDQogICAgICAgICtQb3B1bGF0ZUZyb21EYXRhUm93KCkNCiAgICB9DQogICAgY2xhc3MgUGF0aWVudERldGFpbHNCTCB7DQogICAgICAgICtTZWxlY3QoKSBMaXN0flBhdGllbnREZXRhaWxzfg0KICAgICAgICArU2VsZWN0QnlQYXRpZW50RGV0YWlscygpIFBhdGllbnREZXRhaWxzQkwNCiAgICAgICAgK0luc2VydFBhdGllbnREZXRhaWxzKCkNCiAgICAgICAgK1VwZGF0ZVBhdGllbnREZXRhaWxzKCkNCiAgICAgICAgK0luc2VydFVwZGF0ZVBhdGllbnREZXRhaWxzKCkNCiAgICAgICAgK0lmQ3VycmVudFBhdGllbnREZXRhaWxzRXhpc3QoKSBib29sDQogICAgICAgICtJZkN1cnJlbnRQYXRpZW50QmFua0RldGFpbHNFeGlzdCgpIGJvb2wNCiAgICB9DQogICAgUGF0aWVudERldGFpbHMgPHwtLSBQYXRpZW50RGV0YWlsc0JMDQoNCiAgICBjbGFzcyBSZXF1ZXN0cyB7DQogICAgICAgICvXqdeT15XXqiDXoNeq15XXoNeZ150NCiAgICAgICAgK1BvcHVsYXRlRnJvbURhdGFSb3coKQ0KICAgIH0NCiAgICBjbGFzcyBSZXF1ZXN0c0JMIHsNCiAgICAgICAgK1NlbGVjdCgpIExpc3R+UmVxdWVzdHN+DQogICAgICAgICtTZWxlY3RCeVBheW1lbnRTdGF0dXMoKSBMaXN0flJlcXVlc3Rzfg0KICAgICAgICArU2VsZWN0QnlNb250aFJlcG9ydCgpIExpc3R+UmVxdWVzdHN+DQogICAgICAgICtJbnNlcnRSZXF1ZXN0cygpDQogICAgICAgICtVcGRhdGVSZXF1ZXN0cygpDQogICAgICAgICtEZWxldGVSZXF1ZXN0cygpDQogICAgICAgICtDYW5jZWxJYnVkKCkgaW50DQogICAgICAgICtDYW5jZWxJYnVkRm9yUGF0aW9uKCkgaW50DQogICAgICAgICtjaGVja0NhbmNlbGF0aW9uKCkgaW50DQogICAgfQ0KICAgIFJlcXVlc3RzIDx8LS0gUmVxdWVzdHNCTA0="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h3 id="enums-מרכזיים-מוגדרים-ב-common-cs-">Enums מרכזיים (מוגדרים ב-Common.cs)</h3>
+
+<div class="table-wrapper"><table>
+  <tr>
+    <th>Enum</th>
+    <th>ערכים</th>
+    <th>תיאור</th>
+  </tr>
+  <tr>
+    <td><code>ProgramSymbol</code></td>
+    <td>Blind=5, Deaf=6, Respiration=7, Dogs=8, Phone=9</td>
+    <td>סמלי תוכניות סיוע</td>
+  </tr>
+  <tr>
+    <td><code>RequestStatus</code></td>
+    <td>CurrentPayment=1, RetroactivePayment=2, AbnormalPayment=3, Unpaid=4, Clean=5, Cancellation=6</td>
+    <td>סטטוס בקשה</td>
+  </tr>
+  <tr>
+    <td><code>PaymentStatus</code></td>
+    <td>Wait=1, Passed=2, NotForDataProcessing=3</td>
+    <td>סטטוס תשלום</td>
+  </tr>
+  <tr>
+    <td><code>PaymentTypeSymbol</code></td>
+    <td>BlindWorker=51, BlindNotWorker=52, MinTariff=53, OldMan=54, DeafWorker=61, DeafNotWorker=62, OldWorker=63, OldNotWorker=64, Respiration=71, Dogs=81</td>
+    <td>סוגי עזרה</td>
+  </tr>
+  <tr>
+    <td><code>UserGroup</code></td>
+    <td>View=1, Run=2</td>
+    <td>קבוצות הרשאה</td>
+  </tr>
+  <tr>
+    <td><code>IfExceeding</code></td>
+    <td>ExceedingWaitHarig=0, ExceedingWaitAnala=1, NotExceeding=9</td>
+    <td>חריגה תקציבית</td>
+  </tr>
+  <tr>
+    <td><code>MerkavaParameters</code></td>
+    <td>SendSystem=7, ReceiveSystemCode=6, InterfaceCodeSupport=12, InterfaceCodeRequest=13</td>
+    <td>פרמטרי מרכבה</td>
+  </tr>
+</table></div>
+
+<h3 id="הגדרות-תצורה-app-config-">הגדרות תצורה (app.config)</h3>
+
+<div class="table-wrapper"><table>
+  <tr>
+    <th>מפתח</th>
+    <th>ערך לדוגמה</th>
+    <th>תיאור</th>
+  </tr>
+  <tr>
+    <td>Connection String</td>
+    <td><code>SA_RSA_PAYMENTS_AID</code></td>
+    <td>חיבור לבסיס נתונים ראשי</td>
+  </tr>
+  <tr>
+    <td>Connection String</td>
+    <td><code>MOSA_GENERAL_DATA</code></td>
+    <td>חיבור לנתונים כלליים</td>
+  </tr>
+  <tr>
+    <td><code>ReportServer</code></td>
+    <td><code>http://sqlTest/ReportServer</code></td>
+    <td>שרת דוחות SSRS</td>
+  </tr>
+  <tr>
+    <td><code>ReportPath</code></td>
+    <td><code>/PaymentsAid/</code></td>
+    <td>נתיב דוחות</td>
+  </tr>
+  <tr>
+    <td><code>PaymentsAid_Hasamot_Hasamot</code></td>
+    <td><code>http://adabas/MosaIntegrationWS/Hasamot.asmx</code></td>
+    <td>שירות חסמות</td>
+  </tr>
+  <tr>
+    <td><code>MakeHashavutFile</code></td>
+    <td><code>True/False</code></td>
+    <td>האם לייצר קובץ חשבות</td>
+  </tr>
+  <tr>
+    <td><code>MailAdress</code></td>
+    <td>כתובת מייל</td>
+    <td>כתובת להתראות</td>
+  </tr>
+  <tr>
+    <td><code>DoublePaymentsProgram5And8MailAdress</code></td>
+    <td>כתובות מייל</td>
+    <td>התראת כפולים עיוורים+כלבים</td>
+  </tr>
+  <tr>
+    <td><code>DoublePaymentsProgram6MailAdress</code></td>
+    <td>כתובות מייל</td>
+    <td>התראת כפולים חירשים</td>
+  </tr>
+</table></div>
+
+
+<h2 id="תכונות-נכונות-correctness-properties-">תכונות נכונות (Correctness Properties)</h2>
+
+<p><em>תכונה (Property) היא מאפיין או התנהגות שצריכים להתקיים בכל הרצה תקינה של המערכת - למעשה, הצהרה פורמלית על מה שהמערכת אמורה לעשות. תכונות משמשות כגשר בין מפרטים קריאים לאדם לבין ערבויות נכונות הניתנות לאימות אוטומטי.</em></p>
+
+<h3 id="property-1-populatelist-round-trip-מיפוי-datatable-לאובייקטים">Property 1: PopulateList round-trip - מיפוי DataTable לאובייקטים</h3>
+
+<p><em>לכל</em> DataTable עם N שורות תקינות, הפעלת <code>BaseEntity.PopulateList&lt;T&gt;(dt)</code> צריכה להחזיר רשימה בגודל N, וכל אובייקט ברשימה צריך להכיל את הערכים המתאימים מהשורה המקבילה ב-DataTable.</p>
+
+<p><strong>Validates: Requirements 2.2, 2.4</strong></p>
+
+<h3 id="property-2-getnullablevaluefromcolum-טיפול-בערכי-null">Property 2: GetNullableValueFromColum - טיפול בערכי null</h3>
+
+<p><em>לכל</em> ערך מסוג T ו<em>לכל</em> DataRow, אם העמודה מכילה <code>DBNull.Value</code> או <code>null</code>, אז <code>GetNullableValueFromColum&lt;T&gt;</code> צריכה להחזיר <code>default(T)</code>. אם העמודה מכילה ערך תקין מסוג T, הפונקציה צריכה להחזיר את הערך עצמו.</p>
+
+<p><strong>Validates: Requirements 2.3</strong></p>
+
+<h3 id="property-3-ירושת-bl-מ-bo">Property 3: ירושת BL מ-BO</h3>
+
+<p><em>לכל</em> מחלקת BL בפרויקט PaymentsAidBL, מחלקת הבסיס שלה צריכה להיות המחלקה המקבילה בפרויקט PaymentsAidBO (לדוגמה: <code>PatientDetailsBL</code> יורשת מ-<code>PatientDetails</code>, <code>RequestsBL</code> יורשת מ-<code>Requests</code>).</p>
+
+<p><strong>Validates: Requirements 4.1</strong></p>
+
+<h3 id="property-4-ערכי-enum-וקבועים-תואמים-למפרט">Property 4: ערכי Enum וקבועים תואמים למפרט</h3>
+
+<p><em>לכל</em> ערך enum מוגדר ב-<code>Common.cs</code>, הערך המספרי צריך להתאים למפרט: <code>ProgramSymbol.Blind=5</code>, <code>ProgramSymbol.Deaf=6</code>, <code>ProgramSymbol.Respiration=7</code>, <code>ProgramSymbol.Dogs=8</code>, <code>ProgramSymbol.Phone=9</code>, <code>MerkavaParameters.SendSystem=7</code>, <code>MerkavaParameters.ReceiveSystemCode=6</code>, <code>MerkavaParameters.InterfaceCodeSupport=12</code>, <code>MerkavaParameters.InterfaceCodeRequest=13</code>, וכן שאר ערכי ה-enums.</p>
+
+<p><strong>Validates: Requirements 4.6, 11.2</strong></p>
+
+<h3 id="property-5-פונקציות-עיצוב-תאריכים">Property 5: פונקציות עיצוב תאריכים</h3>
+
+<p><em>לכל</em> תאריך תקין (DateTime), <code>MakeStr4DateSQL(dt)</code> צריכה להחזיר מחרוזת בפורמט <code>'YYYY-MM-DD'</code>, <code>MakeStringYYYYMM(s)</code> צריכה להחזיר מחרוזת בפורמט <code>'YYYYMM'</code>, ו-<code>MakeStr4DateFrom(dt)</code> צריכה להחזיר מחרוזת בפורמט <code>'01/MM/YYYY'</code>.</p>
+
+<p><strong>Validates: Requirements 4.7</strong></p>
+
+<h3 id="property-6-בדיקת-מטופל-נתונים-חסרים-מכשילים-בדיקה">Property 6: בדיקת מטופל - נתונים חסרים מכשילים בדיקה</h3>
+
+<p><em>לכל</em> תוכנית סיוע ו<em>לכל</em> מטופל שחסרים לו פרטים הכרחיים (שם, פרטי בנק, או החלטת זכאות לפי התוכנית), פונקציית הבדיקה (<code>CheckPationtForBlind</code>, <code>CheckPationtForDeaf</code>, <code>CheckPationtForRespirator</code>, <code>CheckPationtForDogs</code>) צריכה להחזיר <code>false</code> ולהגדיר את שדה <code>ProblemReason</code> של המטופל.</p>
+
+<p><strong>Validates: Requirements 7.4, 7.5, 7.6, 7.7, 12.4, 19.1</strong></p>
+
+<h3 id="property-7-מיפוי-paymenttypesymbol-לפי-סטטוס-מטופל">Property 7: מיפוי PaymentTypeSymbol לפי סטטוס מטופל</h3>
+
+<p><em>לכל</em> מטופל עיוור, סוג העזרה (PaymentTypeSymbol) צריך להיקבע באופן דטרמיניסטי: עובד→51, לא עובד→52, מינימום→53, פנסיה→54. <em>לכל</em> מטופל חירש: עובד→61, לא עובד→62, פנסיה עובד→63, פנסיה לא עובד→64.</p>
+
+<p><strong>Validates: Requirements 8.1, 8.2</strong></p>
+
+<h3 id="property-8-חישוב-גיל-פנסיה">Property 8: חישוב גיל פנסיה</h3>
+
+<p><em>לכל</em> תאריך לידה, תאריך דיווח ומין, פונקציית <code>IfPensioner</code> צריכה להחזיר 1 אם ורק אם הגיל בתאריך הדיווח עולה על סף הפנסיה (גבר=67, אישה=62), ו-<code>IfPensionerBlind</code> צריכה להשתמש בסף הפנסיה לעיוורים (גבר=67, אישה=62).</p>
+
+<p><strong>Validates: Requirements 8.5, 8.6</strong></p>
+
+<h3 id="property-9-סימון-חריגה-תקציבית">Property 9: סימון חריגה תקציבית</h3>
+
+<p><em>לכל</em> בקשת תשלום, אם סכום התשלום חורג מהתקציב המוקצה, שדה <code>IfExceeding</code> צריך להיות 0 (ממתין לחריג) או 1 (ממתין לאנלה), ואם לא חורג - הערך צריך להיות 9.</p>
+
+<p><strong>Validates: Requirements 8.7</strong></p>
+
+<h3 id="property-10-זיהוי-תשלומים-כפולים">Property 10: זיהוי תשלומים כפולים</h3>
+
+<p><em>לכל</em> רשימת בקשות תשלום, אם קיימים שני רשומות עם אותו מטופל (IDType + PatientID) ואותו חודש עיבוד בתוכניות שונות, הפונקציה <code>checkDoublePayment()</code> צריכה לזהות אותם כתשלומים כפולים.</p>
+
+<p><strong>Validates: Requirements 8.8</strong></p>
+
+<h3 id="property-11-ייצוא-קבצי-תשלום-שלמות-רשומות">Property 11: ייצוא קבצי תשלום - שלמות רשומות</h3>
+
+<p><em>לכל</em> רשימת תשלומים תקינה (HashavutPayments או MattasPayments), קובץ הייצוא שנוצר צריך להכיל בדיוק את אותו מספר רשומות כמו ברשימת הקלט, וכל רשומה צריכה להכיל את פרטי המטופל והסכום בפורמט הנכון.</p>
+
+<p><strong>Validates: Requirements 7.12, 13.1, 13.2, 13.3</strong></p>
+
+<h3 id="property-12-html-תשלומים-כפולים-מכיל-את-כל-הפרטים">Property 12: HTML תשלומים כפולים מכיל את כל הפרטים</h3>
+
+<p><em>לכל</em> רשימת <code>DoublePayments</code>, הפונקציה <code>getHtml()</code> צריכה להחזיר מחרוזת HTML שמכילה את פרטי כל המטופלים ברשימה (שם, ת.ז, סכום).</p>
+
+<p><strong>Validates: Requirements 15.5</strong></p>
+
+<h3 id="property-13-אימות-קלט-מספרי-בלבד">Property 13: אימות קלט מספרי בלבד</h3>
+
+<p><em>לכל</em> תו (char), פונקציית <code>OnlyNum</code> צריכה לאשר רק תווים מספריים (0-9) ולדחות כל תו אחר.</p>
+
+<p><strong>Validates: Requirements 16.5</strong></p>
+
+<h3 id="property-14-חישוב-סכום-תשלום-דטרמיניסטי">Property 14: חישוב סכום תשלום דטרמיניסטי</h3>
+
+<p><em>לכל</em> מטופל עם סוג עזרה ותעריף ידועים, סכום התשלום המחושב צריך להיות שווה לתעריף המוגדר לסוג העזרה שלו, ללא תלות בסדר העיבוד או במטופלים אחרים.</p>
+
+<p><strong>Validates: Requirements 7.8, 9.5, 9.6</strong></p>
+
+<h2 id="טיפול-בשגיאות-error-handling-">טיפול בשגיאות (Error Handling)</h2>
+
+<h3 id="שגיאות-ברמת-המטופל-עיבוד-שוטף-">שגיאות ברמת המטופל (עיבוד שוטף)</h3>
+
+<p>כאשר מטופל נכשל בבדיקות שלב 1, המערכת:</p>
+<p>1. מגדירה את שדה <code>ProblemReason</code> באובייקט המטופל (Blind/Deaf/Respirator/BlindDog)</p>
+<p>2. מוסיפה את המטופל לרשימת הבעיות המוצגת ב-DataGridView</p>
+<p>3. בסיום העיבוד, מייצרת דוח מטופלים בעייתיים (<code>RenderProblemPatientReport</code>)</p>
+<p>4. שולחת את הדוח במייל לכתובות המוגדרות</p>
+
+<h3 id="שגיאות-מרכבה">שגיאות מרכבה</h3>
+
+<ul>
+  <li><code>SupportApplication.ErrorFiledDesc</code> + <code>ErrorDesc</code> - שגיאות בבקשת תמיכה</li>
+  <li><code>HashavutPayments.MerkavaErrorDesc</code> - שגיאות בדרישת תשלום</li>
+  <li><code>PatientDetails.ErrorHizon</code> - שגיאות חיזון ברמת המטופל</li>
+  <li>סטטוס חיזון (<code>ApplicationMerkavaStatusHizun</code>, <code>PaymentReqMerkavaStatusHizon</code>) מציין הצלחה/כישלון</li>
+</ul>
+
+<h3 id="שגיאות-כלליות">שגיאות כלליות</h3>
+
+<ul>
+  <li><code>BaseEntity.ErrorString</code> - שדה שגיאה גנרי בכל אובייקט עסקי</li>
+  <li>תשלומים כפולים מזוהים ב-<code>checkDoublePayment()</code> ונשלחת התראה במייל</li>
+  <li>חריגות תקציביות מסומנות ב-<code>IfExceeding</code> ומטופלות בנפרד</li>
+</ul>
+
+<h3 id="זרימת-טיפול-בשגיאות">זרימת טיפול בשגיאות</h3>
+
+<div class="mermaid-container" data-mermaid="Zmxvd2NoYXJ0IFREDQogICAgQ0hFQ0tb15HXk9eZ16fXqiDXnteY15XXpNecIC0g16nXnNeRIDFdIC0tPnzXoNeb16nXnHwgUFJPQkxFTVvXlNeV16HXpNeUINec16jXqdeZ157XqiDXkdei15nXldeqPGJyLz5Qcm9ibGVtUmVhc29uID0g16HXmdeR15RdDQogICAgQ0hFQ0sgLS0+fNei15HXqHwgQ0FMQ1vXl9eZ16nXldeRIC0g16nXnNeRIDJdDQogICAgQ0FMQyAtLT5815fXqNeZ15LXlHwgRVhDRUVEW9eh15nXnteV158gSWZFeGNlZWRpbmddDQogICAgQ0FMQyAtLT5816rXp9eZ1598IE1FUktBVkFb15TXoteR16jXlCDXnNee16jXm9eR15QgLSDXqdec15EgM10NCiAgICBNRVJLQVZBIC0tPnzXqdeS15nXkNeqINeX15nXlteV1598IEVSUl9NRVJLQVZBW9ei15PXm9eV158gRXJyb3JEZXNjPGJyLz5NZXJrYXZhRXJyb3JEZXNjXQ0KICAgIE1FUktBVkEgLS0+fNeU16bXnNeX15R8IFBBWU1FTlRb15PXqNeZ16nXqiDXqtep15zXldedIC0g16nXnNeRIDVdDQogICAgUEFZTUVOVCAtLT5815vXpNeV15x8IERPVUJMRVvXlNeq16jXkNeqINeq16nXnNeV157XmdedINeb16TXldec15nXnTxici8+157XmdeZ15wgKyBIVE1MXQ0KICAgIFBST0JMRU0gLS0+IFJFUE9SVFvXk9eV15cg15HXoteZ15XXqiArINee15nXmdecXQ0="><div class="mermaid-loading">Loading diagram...</div></div>
+
+<h2 id="אסטרטגיית-בדיקות-testing-strategy-">אסטרטגיית בדיקות (Testing Strategy)</h2>
+
+<h3 id="גישה-כפולה-בדיקות-יחידה-בדיקות-מבוססות-תכונות">גישה כפולה: בדיקות יחידה + בדיקות מבוססות תכונות</h3>
+
+<p>המערכת דורשת שני סוגי בדיקות משלימים:</p>
+
+<h4 id="בדיקות-יחידה-unit-tests-">בדיקות יחידה (Unit Tests)</h4>
+<p>מתמקדות בדוגמאות ספציפיות, מקרי קצה, ותנאי שגיאה:</p>
+<ul>
+  <li>אימות מבנה פרויקטים (תלויות, namespaces, OutputType)</li>
+  <li>אימות ערכי enum ספציפיים</li>
+  <li>אימות הגדרות תצורה (connection strings, URLs)</li>
+  <li>אימות מבנה ישויות עסקיות (שדות קיימים)</li>
+  <li>מקרי קצה: DataTable ריק, ערכי null, תאריכים לא תקינים</li>
+</ul>
+
+<h4 id="בדיקות-מבוססות-תכונות-property-based-tests-">בדיקות מבוססות תכונות (Property-Based Tests)</h4>
+<p>מאמתות תכונות אוניברסליות על פני כל הקלטים:</p>
+<ul>
+  <li>ספריית בדיקות: <strong>FsCheck</strong> (עבור C# / .NET)</li>
+  <li>מינימום 100 איטרציות לכל בדיקת תכונה</li>
+  <li>כל בדיקה מתויגת בהתאם לתכונה במסמך העיצוב</li>
+</ul>
+
+<h4 id="תיוג-בדיקות-תכונה">תיוג בדיקות תכונה</h4>
+
+<p>כל בדיקת תכונה תתויג בפורמט:</p>
+<pre><code>// Feature: payments-aid-system-documentation, Property {number}: {property_text}</code></pre>
+
+<h4 id="מיפוי-תכונות-לבדיקות">מיפוי תכונות לבדיקות</h4>
+
+<div class="table-wrapper"><table>
+  <tr>
+    <th>תכונה</th>
+    <th>סוג בדיקה</th>
+    <th>תיאור</th>
+  </tr>
+  <tr>
+    <td>Property 1</td>
+    <td>Property Test</td>
+    <td>PopulateList round-trip</td>
+  </tr>
+  <tr>
+    <td>Property 2</td>
+    <td>Property Test</td>
+    <td>GetNullableValueFromColum null handling</td>
+  </tr>
+  <tr>
+    <td>Property 3</td>
+    <td>Property Test</td>
+    <td>BL inherits from BO</td>
+  </tr>
+  <tr>
+    <td>Property 4</td>
+    <td>Property Test</td>
+    <td>Enum values match spec</td>
+  </tr>
+  <tr>
+    <td>Property 5</td>
+    <td>Property Test</td>
+    <td>Date formatting functions</td>
+  </tr>
+  <tr>
+    <td>Property 6</td>
+    <td>Property Test</td>
+    <td>Patient validation - missing data</td>
+  </tr>
+  <tr>
+    <td>Property 7</td>
+    <td>Property Test</td>
+    <td>PaymentTypeSymbol mapping</td>
+  </tr>
+  <tr>
+    <td>Property 8</td>
+    <td>Property Test</td>
+    <td>Pension age calculation</td>
+  </tr>
+  <tr>
+    <td>Property 9</td>
+    <td>Property Test</td>
+    <td>Budget exceeding flag</td>
+  </tr>
+  <tr>
+    <td>Property 10</td>
+    <td>Property Test</td>
+    <td>Double payment detection</td>
+  </tr>
+  <tr>
+    <td>Property 11</td>
+    <td>Property Test</td>
+    <td>Export file record completeness</td>
+  </tr>
+  <tr>
+    <td>Property 12</td>
+    <td>Property Test</td>
+    <td>Double payments HTML content</td>
+  </tr>
+  <tr>
+    <td>Property 13</td>
+    <td>Property Test</td>
+    <td>Numeric-only validation</td>
+  </tr>
+  <tr>
+    <td>Property 14</td>
+    <td>Property Test</td>
+    <td>Payment amount determinism</td>
+  </tr>
+</table></div>
+
+<h4 id="בדיקות-יחידה-דוגמאות-ומקרי-קצה-">בדיקות יחידה (דוגמאות ומקרי קצה)</h4>
+
+<div class="table-wrapper"><table>
+  <tr>
+    <th>דרישה</th>
+    <th>סוג בדיקה</th>
+    <th>תיאור</th>
+  </tr>
+  <tr>
+    <td>1.1-1.9</td>
+    <td>Unit Test</td>
+    <td>אימות מבנה פרויקטים ותלויות</td>
+  </tr>
+  <tr>
+    <td>2.1, 2.5-2.8</td>
+    <td>Unit Test</td>
+    <td>אימות מבנה ישויות עסקיות</td>
+  </tr>
+  <tr>
+    <td>3.3, 3.4, 3.6</td>
+    <td>Unit Test</td>
+    <td>אימות הגדרות DAL</td>
+  </tr>
+  <tr>
+    <td>5.2-5.5</td>
+    <td>Unit Test</td>
+    <td>אימות הרשאות משתמש</td>
+  </tr>
+  <tr>
+    <td>6.2, 6.5</td>
+    <td>Unit Test</td>
+    <td>אימות מבנה MainForm</td>
+  </tr>
+  <tr>
+    <td>8.3, 8.4</td>
+    <td>Unit Test</td>
+    <td>ערכי PaymentTypeSymbol קבועים</td>
+  </tr>
+  <tr>
+    <td>11.3, 11.4</td>
+    <td>Unit Test</td>
+    <td>מבנה ישויות ממשק מרכבה</td>
+  </tr>
+  <tr>
+    <td>12.1</td>
+    <td>Unit Test</td>
+    <td>כתובת שירות חסמות</td>
+  </tr>
+  <tr>
+    <td>18.1-18.6</td>
+    <td>Unit Test</td>
+    <td>מבנה ישויות תוכניות סיוע</td>
+  </tr>
+  <tr>
+    <td>20.1-20.5</td>
+    <td>Unit Test</td>
+    <td>הגדרות תצורה</td>
+  </tr>
+</table></div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false, theme:'default', securityLevel:'loose'});
+(async function(){
+  const containers = document.querySelectorAll('.mermaid-container');
+  for(let i=0; i<containers.length; i++){
+    const c = containers[i];
+    const b64 = c.getAttribute('data-mermaid');
+    const src = decodeURIComponent(escape(atob(b64)));
+    try {
+      const {svg} = await mermaid.render('mermaid-'+i, src);
+      c.innerHTML = svg;
+    } catch(e) {
+      c.innerHTML = '<pre style="text-align:left;direction:ltr;background:#f8f8f8;padding:16px;border-radius:8px;white-space:pre-wrap;color:#333;">'+src.replace(/</g,'&lt;')+'<\/pre>';
+    }
+  }
+})();
+</script>
+</body>
+</html>

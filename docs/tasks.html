@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>תוכנית יישום: תיעוד מערכת PaymentsAid</title>
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.7;
+  color: #1a1a2e;
+  background: #f8f9fa;
+  padding: 40px 20px;
+  direction: rtl;
+  max-width: 960px;
+  margin: 0 auto;
+}
+h1, h2, h3, h4, h5, h6 {
+  color: #16213e;
+  margin: 1.5em 0 0.5em;
+  line-height: 1.3;
+}
+h1 { font-size: 2em; border-bottom: 3px solid #0f3460; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.2em; }
+h3 { font-size: 1.25em; color: #0f3460; }
+h4 { font-size: 1.1em; }
+p { margin: 0.8em 0; }
+a { color: #0f3460; text-decoration: underline; }
+code {
+  background: #e8edf3;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.9em;
+}
+pre {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1em 0;
+  direction: ltr;
+  text-align: left;
+}
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: 0.85em;
+}
+.table-wrapper {
+  overflow-x: auto;
+  margin: 1em 0;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9em;
+}
+th, td {
+  border: 1px solid #cbd5e0;
+  padding: 8px 12px;
+  text-align: right;
+}
+th {
+  background: #0f3460;
+  color: white;
+  font-weight: 600;
+}
+tr:nth-child(even) { background: #f1f5f9; }
+tr:hover { background: #e2e8f0; }
+ul {
+  margin: 0.5em 0 0.5em 0;
+  padding-right: 2em;
+}
+li { margin: 0.3em 0; }
+hr {
+  border: none;
+  border-top: 2px solid #e2e8f0;
+  margin: 2em 0;
+}
+strong { color: #0f3460; }
+em { font-style: italic; }
+pre.mermaid {
+  background: white;
+  color: #333;
+  text-align: center;
+  direction: ltr;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+.mermaid-container {
+  background: white;
+  text-align: center;
+  direction: ltr;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+.mermaid-loading {
+  color: #999;
+  font-style: italic;
+  padding: 2em;
+}
+@media print {
+  body { padding: 20px; background: white; }
+  pre { background: #f0f0f0; color: #333; }
+  th { background: #333; }
+}
+</style>
+</head>
+<body>
+<h1 id="תוכנית-יישום-תיעוד-מערכת-paymentsaid">תוכנית יישום: תיעוד מערכת PaymentsAid</h1>
+
+<h2 id="סקירה">סקירה</h2>
+
+<p>תוכנית זו מתארת את שלבי יצירת התיעוד, סקריפטי אימות, ובדיקות עבור מערכת PaymentsAid הקיימת. המשימות מתמקדות בניתוח הקוד הקיים, יצירת קבצי תיעוד בקוד (Markdown), וכתיבת בדיקות יחידה ובדיקות תכונות שמאמתות את מבנה המערכת והלוגיקה העסקית.</p>
+
+<h2 id="משימות">משימות</h2>
+
+<ul>
+  <li>1. תיעוד ארכיטקטורת המערכת ומבנה השכבות</li>
+  <li>1.1 יצירת קובץ תיעוד <code>docs/architecture-overview.md</code> המתאר את מבנה 4 הפרויקטים (UI, BL, BO, DAL), תלויות בין השכבות, namespaces, וסוגי פלט (WinExe/Library)</li>
+  <li>לכלול דיאגרמת תלויות בפורמט Mermaid</li>
+  <li>לתעד את הספריות החיצוניות (MosaGeneralData, ActiveReports3, ReportViewer, XPCommonControls)</li>
+  <li>_דרישות: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9_</li>
+</ul>
+
+<ul>
+  <li>1.2 כתיבת בדיקות יחידה לאימות מבנה הפרויקטים</li>
+  <li>אימות שקבצי .csproj מכילים את ה-ProjectReferences הנכונים</li>
+  <li>אימות OutputType (WinExe עבור UI, Library עבור BL/BO/DAL)</li>
+  <li>אימות RootNamespace בכל פרויקט</li>
+  <li>_דרישות: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8_</li>
+</ul>
+
+<ul>
+  <li>2. תיעוד שכבת האובייקטים העסקיים (BO) ותבנית BaseEntity</li>
+  <li>2.1 יצירת קובץ תיעוד <code>docs/business-objects.md</code> המתאר את BaseEntity, תבנית PopulateFromDataRow, ורשימת כל הישויות העסקיות עם השדות המרכזיים שלהן</li>
+  <li>לתעד את PatientDetails, Requests, SupportApplication, Blind, Deaf, Respirator, BlindDog, HashavutPayments, MattasPayments, MonthsProcess, AidType, Eligible, EntitlementDecision, DoublePayments, TimingInterface, Users</li>
+  <li>לכלול דיאגרמת מחלקות בפורמט Mermaid</li>
+  <li>_דרישות: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8_</li>
+</ul>
+
+<ul>
+  <li>2.2 כתיבת בדיקת תכונה עבור PopulateList round-trip</li>
+  <li><strong>Property 1: PopulateList round-trip - מיפוי DataTable לאובייקטים</strong></li>
+  <li><strong>מאמת: דרישות 2.2, 2.4</strong></li>
+</ul>
+
+<ul>
+  <li>2.3 כתיבת בדיקת תכונה עבור GetNullableValueFromColum</li>
+  <li><strong>Property 2: GetNullableValueFromColum - טיפול בערכי null</strong></li>
+  <li><strong>מאמת: דרישות 2.3</strong></li>
+</ul>
+
+<ul>
+  <li>3. תיעוד שכבת הגישה לנתונים (DAL)</li>
+  <li>3.1 יצירת קובץ תיעוד <code>docs/data-access-layer.md</code> המתאר את תבנית Typed DataSet, שימוש ב-Stored Procedures, הגדרות חיבור, ורשימת ה-DAL classes</li>
+  <li>לתעד את מוסכמת השמות של SP: <code>usp_APP_*_Select/Insert/Update/Delete</code></li>
+  <li>לתעד את החיבור ל-SQL Server עם Windows Integrated Security</li>
+  <li>לתעד את תהליך עדכון XSD ויצירת Designer.cs</li>
+  <li>_דרישות: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_</li>
+</ul>
+
+<ul>
+  <li>3.2 כתיבת בדיקות יחידה לאימות הגדרות DAL</li>
+  <li>אימות connection string ב-app.config</li>
+  <li>אימות קיום קבצי XSD בפרויקט DAL</li>
+  <li>_דרישות: 3.3, 3.4, 3.5_</li>
+</ul>
+
+<ul>
+  <li>4. תיעוד שכבת הלוגיקה העסקית (BL) ותבנית ירושה</li>
+  <li>4.1 יצירת קובץ תיעוד <code>docs/business-logic.md</code> המתאר את תבנית הירושה BL←BO, מתודות CRUD, מחלקת Common עם Enums ופונקציות עזר</li>
+  <li>לתעד את כל ה-Enums: ProgramSymbol, RequestStatus, PaymentStatus, PaymentTypeSymbol, UserGroup, IfExceeding, MerkavaParameters</li>
+  <li>לתעד את פונקציות העזר: MakeStringSQL, MakeStringYYYYMM, MakeStr4DateSQL, MakeStr4DateFrom, MakeStr4DateTo</li>
+  <li>_דרישות: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8_</li>
+</ul>
+
+<ul>
+  <li>4.2 כתיבת בדיקת תכונה עבור ירושת BL מ-BO</li>
+  <li><strong>Property 3: ירושת BL מ-BO</strong></li>
+  <li><strong>מאמת: דרישות 4.1</strong></li>
+</ul>
+
+<ul>
+  <li>4.3 כתיבת בדיקת תכונה עבור ערכי Enum</li>
+  <li><strong>Property 4: ערכי Enum וקבועים תואמים למפרט</strong></li>
+  <li><strong>מאמת: דרישות 4.6, 11.2</strong></li>
+</ul>
+
+<ul>
+  <li>4.4 כתיבת בדיקת תכונה עבור פונקציות עיצוב תאריכים</li>
+  <li><strong>Property 5: פונקציות עיצוב תאריכים</strong></li>
+  <li><strong>מאמת: דרישות 4.7</strong></li>
+</ul>
+
+<ul>
+  <li>5. נקודת ביקורת - אימות תיעוד שכבות הליבה</li>
+  <li>ודא שכל קבצי התיעוד נוצרו ושהבדיקות עוברות. שאל את המשתמש אם יש שאלות.</li>
+</ul>
+
+<ul>
+  <li>6. תיעוד אימות משתמשים, הרשאות ומסך ראשי</li>
+  <li>6.1 יצירת קובץ תיעוד <code>docs/authentication-and-navigation.md</code> המתאר את תהליך האימות (Active Directory), קבוצות הרשאה (SiyoaR/SiyoaWrite), מניעת הפעלה כפולה, מבנה MainForm כ-MDI Container, וקישורי הניווט</li>
+  <li>לתעד את זרימת Program.cs: CheckForPreviousInstance → WindowsIdentity → בדיקת קבוצות → MainForm</li>
+  <li>לתעד את מבנה SplitContainer ואת הטפסים הנפתחים מכל קישור</li>
+  <li>_דרישות: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_</li>
+</ul>
+
+<ul>
+  <li>6.2 כתיבת בדיקות יחידה לאימות הרשאות ומבנה ניווט</li>
+  <li>אימות קיום קבוצות AD בקוד</li>
+  <li>אימות מבנה MainForm (MDI, קישורי ניווט)</li>
+  <li>_דרישות: 5.2, 5.3, 6.2_</li>
+</ul>
+
+<ul>
+  <li>7. תיעוד תהליך העיבוד השוטף (RequestForm)</li>
+  <li>7.1 יצירת קובץ תיעוד <code>docs/monthly-processing.md</code> המתאר את 7 שלבי העיבוד (שלב 0-6), פונקציות בדיקת מטופלים לכל תוכנית, ופונקציות חישוב סכומים</li>
+  <li>לתעד כל שלב עם דיאגרמת זרימה</li>
+  <li>לתעד את פונקציות CheckPationtFor* ואת הבדיקות שכל אחת מבצעת</li>
+  <li>לתעד את פונקציות MakeCalculation* ואת סוגי העזרה (PaymentTypeSymbol) לכל תוכנית</li>
+  <li>_דרישות: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 7.12_</li>
+</ul>
+
+<ul>
+  <li>7.2 כתיבת בדיקת תכונה עבור בדיקת מטופל - נתונים חסרים</li>
+  <li><strong>Property 6: בדיקת מטופל - נתונים חסרים מכשילים בדיקה</strong></li>
+  <li><strong>מאמת: דרישות 7.4, 7.5, 7.6, 7.7, 12.4, 19.1</strong></li>
+</ul>
+
+<ul>
+  <li>7.3 כתיבת בדיקת תכונה עבור מיפוי PaymentTypeSymbol</li>
+  <li><strong>Property 7: מיפוי PaymentTypeSymbol לפי סטטוס מטופל</strong></li>
+  <li><strong>מאמת: דרישות 8.1, 8.2</strong></li>
+</ul>
+
+<ul>
+  <li>8. תיעוד חישוב סכומי תשלום וגיל פנסיה</li>
+  <li>8.1 יצירת קובץ תיעוד <code>docs/payment-calculation.md</code> המתאר את לוגיקת חישוב התשלומים, חישוב גיל פנסיה, חריגות תקציביות, וזיהוי תשלומים כפולים</li>
+  <li>לתעד את טבלת PaymentTypeSymbol המלאה (51-81)</li>
+  <li>לתעד את ספי גיל הפנסיה: PensionAge, OldPensionAge, PensionAgeBlind</li>
+  <li>לתעד את IfExceeding enum וזרימת הטיפול בחריגות</li>
+  <li>_דרישות: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8_</li>
+</ul>
+
+<ul>
+  <li>8.2 כתיבת בדיקת תכונה עבור חישוב גיל פנסיה</li>
+  <li><strong>Property 8: חישוב גיל פנסיה</strong></li>
+  <li><strong>מאמת: דרישות 8.5, 8.6</strong></li>
+</ul>
+
+<ul>
+  <li>8.3 כתיבת בדיקת תכונה עבור סימון חריגה תקציבית</li>
+  <li><strong>Property 9: סימון חריגה תקציבית</strong></li>
+  <li><strong>מאמת: דרישות 8.7</strong></li>
+</ul>
+
+<ul>
+  <li>8.4 כתיבת בדיקת תכונה עבור זיהוי תשלומים כפולים</li>
+  <li><strong>Property 10: זיהוי תשלומים כפולים</strong></li>
+  <li><strong>מאמת: דרישות 8.8</strong></li>
+</ul>
+
+<ul>
+  <li>9. תיעוד תשלום רטרואקטיבי וביטול עיבוד</li>
+  <li>9.1 יצירת קובץ תיעוד <code>docs/retro-payment-and-cancellation.md</code> המתאר את RetroPaymentForm (חיפוש מטופל, בדיקת זכאות, חישוב, יצירת בקשה עם RequestStatus=2) ואת CancelIbud (ביטול מלא/למטופל)</li>
+  <li>לתעד את DoCalculationForBlind, DoCalculationForDeaf</li>
+  <li>לתעד את checkIfIbudIsDone ואת CheckBeforeRespiratorOrder</li>
+  <li>לתעד את MakeFullCancelation ו-MakePationCancelation</li>
+  <li>_דרישות: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.10, 10.1, 10.2, 10.3, 10.4, 10.5_</li>
+</ul>
+
+<ul>
+  <li>9.2 כתיבת בדיקת תכונה עבור חישוב סכום תשלום דטרמיניסטי</li>
+  <li><strong>Property 14: חישוב סכום תשלום דטרמיניסטי</strong></li>
+  <li><strong>מאמת: דרישות 7.8, 9.5, 9.6</strong></li>
+</ul>
+
+<ul>
+  <li>10. נקודת ביקורת - אימות תיעוד תהליכים עסקיים</li>
+  <li>ודא שכל קבצי התיעוד נוצרו ושהבדיקות עוברות. שאל את המשתמש אם יש שאלות.</li>
+</ul>
+
+<ul>
+  <li>11. תיעוד ממשקים חיצוניים (מרכבה, חסמות, ייצוא קבצים)</li>
+  <li>11.1 יצירת קובץ תיעוד <code>docs/external-interfaces.md</code> המתאר את ממשק מרכבה (תובחה, TimingInterface, SupportApplication, HashavutPayments), ממשק חסמות (SOAP Web Service), וייצוא קבצי תשלום (חשבות, מט"ס)</li>
+  <li>לתעד את פרמטרי מרכבה: SendSystem=7, ReceiveSystem=6, InterfaceCodeSupport=12, InterfaceCodeRequest=13</li>
+  <li>לתעד את כתובת חסמות ואת HasamaWithMisgeretInfo</li>
+  <li>לתעד את 4 פונקציות הייצוא: ExportFileHashavut, ExportFileHashavutRespiration, ExportFileMattasBlind, ExportFileMattasDeaf</li>
+  <li>_דרישות: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 12.1, 12.2, 12.3, 12.4, 13.1, 13.2, 13.3, 13.4, 13.5_</li>
+</ul>
+
+<ul>
+  <li>11.2 כתיבת בדיקת תכונה עבור ייצוא קבצי תשלום</li>
+  <li><strong>Property 11: ייצוא קבצי תשלום - שלמות רשומות</strong></li>
+  <li><strong>מאמת: דרישות 7.12, 13.1, 13.2, 13.3</strong></li>
+</ul>
+
+<ul>
+  <li>12. תיעוד דוחות, מיילים, תעריפים ושאילתות</li>
+  <li>12.1 יצירת קובץ תיעוד <code>docs/reports-mail-tariffs-queries.md</code> המתאר את מערכת הדוחות (SSRS + ReportViewer), מערכת המיילים (MailHelper, SMTP), ניהול תעריפים (TaarifimForm), ומודול שאילתות (QueryForm)</li>
+  <li>לתעד את הגדרות ReportServer ו-ReportPath</li>
+  <li>לתעד את MailHelper: SMTP, כתובת שולח, שמירה ב-DB</li>
+  <li>לתעד את GeneralFunc: RenderProblemPatientReport, SendMailForDoublePayments</li>
+  <li>_דרישות: 14.1, 14.2, 14.3, 14.4, 14.5, 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 16.1, 16.2, 16.3, 16.4, 16.5, 17.1, 17.2, 17.3_</li>
+</ul>
+
+<ul>
+  <li>12.2 כתיבת בדיקת תכונה עבור HTML תשלומים כפולים</li>
+  <li><strong>Property 12: HTML תשלומים כפולים מכיל את כל הפרטים</strong></li>
+  <li><strong>מאמת: דרישות 15.5</strong></li>
+</ul>
+
+<ul>
+  <li>12.3 כתיבת בדיקת תכונה עבור אימות קלט מספרי</li>
+  <li><strong>Property 13: אימות קלט מספרי בלבד</strong></li>
+  <li><strong>מאמת: דרישות 16.5</strong></li>
+</ul>
+
+<ul>
+  <li>13. תיעוד תוכניות סיוע, טיפול בשגיאות והגדרות תצורה</li>
+  <li>13.1 יצירת קובץ תיעוד <code>docs/aid-programs-errors-config.md</code> המתאר את המודל הספציפי לכל תוכנית סיוע (Blind, Deaf, Respirator, BlindDog), מנגנון טיפול בשגיאות (ProblemReason, ErrorString, שגיאות מרכבה), והגדרות תצורה (app.config)</li>
+  <li>לתעד את השדות הייחודיים לכל תוכנית</li>
+  <li>לתעד את זרימת הטיפול בשגיאות: בעיות מטופל → דוח → מייל</li>
+  <li>לתעד את כל מפתחות app.config: connection strings, ReportServer, חסמות, מיילים, MakeHashavutFile</li>
+  <li>_דרישות: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 19.1, 19.2, 19.3, 19.4, 19.5, 20.1, 20.2, 20.3, 20.4, 20.5, 20.6_</li>
+</ul>
+
+<ul>
+  <li>13.2 כתיבת בדיקות יחידה לאימות הגדרות תצורה</li>
+  <li>אימות קיום connection strings ב-app.config</li>
+  <li>אימות קיום הגדרות ReportServer, חסמות, מיילים</li>
+  <li>_דרישות: 20.1, 20.2, 20.3, 20.4, 20.5_</li>
+</ul>
+
+<ul>
+  <li>14. יצירת מדריך קליטה מסכם למפתח חדש</li>
+  <li>14.1 יצירת קובץ <code>docs/README.md</code> המשמש כנקודת כניסה למפתח חדש, עם קישורים לכל קבצי התיעוד, סדר קריאה מומלץ, ומילון מונחים מרכזי</li>
+  <li>לכלול תרשים מבנה תיקיות הפרויקט</li>
+  <li>לכלול רשימת קיצורים ומונחים עסקיים</li>
+  <li>לכלול הוראות הגדרת סביבת פיתוח (prerequisites)</li>
+  <li>_דרישות: כל הדרישות (1-20)_</li>
+</ul>
+
+<ul>
+  <li>15. נקודת ביקורת סופית - אימות שלמות התיעוד</li>
+  <li>ודא שכל קבצי התיעוד נוצרו, שכל הבדיקות עוברות, ושכל הדרישות מכוסות. שאל את המשתמש אם יש שאלות.</li>
+</ul>
+
+<h2 id="הערות">הערות</h2>
+
+<ul>
+  <li>משימות המסומנות ב-<code>*</code> הן אופציונליות וניתן לדלג עליהן לקבלת MVP מהיר יותר</li>
+  <li>כל משימה מפנה לדרישות ספציפיות לצורך מעקב</li>
+  <li>נקודות ביקורת מבטיחות אימות הדרגתי</li>
+  <li>בדיקות תכונות מאמתות תכונות נכונות אוניברסליות</li>
+  <li>בדיקות יחידה מאמתות דוגמאות ספציפיות ומקרי קצה</li>
+</ul>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false, theme:'default', securityLevel:'loose'});
+(async function(){
+  const containers = document.querySelectorAll('.mermaid-container');
+  for(let i=0; i<containers.length; i++){
+    const c = containers[i];
+    const b64 = c.getAttribute('data-mermaid');
+    const src = decodeURIComponent(escape(atob(b64)));
+    try {
+      const {svg} = await mermaid.render('mermaid-'+i, src);
+      c.innerHTML = svg;
+    } catch(e) {
+      c.innerHTML = '<pre style="text-align:left;direction:ltr;background:#f8f8f8;padding:16px;border-radius:8px;white-space:pre-wrap;color:#333;">'+src.replace(/</g,'&lt;')+'<\/pre>';
+    }
+  }
+})();
+</script>
+</body>
+</html>

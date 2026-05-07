@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מסמך דרישות - תיעוד מערכת PaymentsAid</title>
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.7;
+  color: #1a1a2e;
+  background: #f8f9fa;
+  padding: 40px 20px;
+  direction: rtl;
+  max-width: 960px;
+  margin: 0 auto;
+}
+h1, h2, h3, h4, h5, h6 {
+  color: #16213e;
+  margin: 1.5em 0 0.5em;
+  line-height: 1.3;
+}
+h1 { font-size: 2em; border-bottom: 3px solid #0f3460; padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.2em; }
+h3 { font-size: 1.25em; color: #0f3460; }
+h4 { font-size: 1.1em; }
+p { margin: 0.8em 0; }
+a { color: #0f3460; text-decoration: underline; }
+code {
+  background: #e8edf3;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.9em;
+}
+pre {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1em 0;
+  direction: ltr;
+  text-align: left;
+}
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: 0.85em;
+}
+.table-wrapper {
+  overflow-x: auto;
+  margin: 1em 0;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9em;
+}
+th, td {
+  border: 1px solid #cbd5e0;
+  padding: 8px 12px;
+  text-align: right;
+}
+th {
+  background: #0f3460;
+  color: white;
+  font-weight: 600;
+}
+tr:nth-child(even) { background: #f1f5f9; }
+tr:hover { background: #e2e8f0; }
+ul {
+  margin: 0.5em 0 0.5em 0;
+  padding-right: 2em;
+}
+li { margin: 0.3em 0; }
+hr {
+  border: none;
+  border-top: 2px solid #e2e8f0;
+  margin: 2em 0;
+}
+strong { color: #0f3460; }
+em { font-style: italic; }
+pre.mermaid {
+  background: white;
+  color: #333;
+  text-align: center;
+  direction: ltr;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+.mermaid-container {
+  background: white;
+  text-align: center;
+  direction: ltr;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+.mermaid-loading {
+  color: #999;
+  font-style: italic;
+  padding: 2em;
+}
+@media print {
+  body { padding: 20px; background: white; }
+  pre { background: #f0f0f0; color: #333; }
+  th { background: #333; }
+}
+</style>
+</head>
+<body>
+<h1 id="מסמך-דרישות-תיעוד-מערכת-paymentsaid">מסמך דרישות - תיעוד מערכת PaymentsAid</h1>
+
+<h2 id="מבוא">מבוא</h2>
+
+<p>מערכת PaymentsAid היא אפליקציית Windows Forms בשפת C# המשמשת לניהול תשלומי סיוע לאוכלוסיות מיוחדות במשרד הרווחה (מוסא). המערכת מטפלת בתשלומים עבור חמש תוכניות סיוע: עיוורים, חירשים, מונשמים, כלבי נחייה לעיוורים וטלפון לחירשים. המערכת בנויה בארכיטקטורת 3-Tier קלאסית ומתממשקת עם מערכת מרכבה (ERP ממשלתי) ומערכת חשבות לביצוע תשלומים בפועל.</p>
+
+<p>מסמך זה נועד לשמש כמדריך קליטה מקיף למפתח חדש המצטרף לצוות.</p>
+
+<h2 id="מילון-מונחים">מילון מונחים</h2>
+
+<ul>
+  <li><strong>PaymentsAid_UI</strong>: שכבת ממשק המשתמש (Windows Forms) - פרויקט <code>PaymentsAid</code>, namespace: <code>Mosa.PaymentsAid.Win</code></li>
+  <li><strong>PaymentsAid_BL</strong>: שכבת הלוגיקה העסקית - פרויקט <code>PaymentsAidBL</code>, namespace: <code>Mosa.PaymentsAid.BL</code></li>
+  <li><strong>PaymentsAid_BO</strong>: שכבת האובייקטים העסקיים - פרויקט <code>PaymentsAidBO</code>, namespace: <code>Mosa.PaymentsAid.BO</code></li>
+  <li><strong>PaymentsAid_DAL</strong>: שכבת גישה לנתונים - פרויקט <code>PaymentsAidDAL</code>, namespace: <code>Mosa.PaymentsAid.Dal</code></li>
+  <li><strong>מרכבה</strong>: מערכת ה-ERP הממשלתית לניהול כספים, תקציבים ותשלומים</li>
+  <li><strong>חשבות (Hashavut)</strong>: מערכת החשבות הכללית לביצוע תשלומים בפועל</li>
+  <li><strong>מט"ס (Mattas)</strong>: מערכת מט"ס לניהול תשלומים לחירשים ועיוורים</li>
+  <li><strong>מרגנית (Marganit)</strong>: מערכת מספור אישי למטופלים</li>
+  <li><strong>חסמות (Hasamot)</strong>: שירות Web חיצוני לבדיקת זכאויות והסמכות רפואיות</li>
+  <li><strong>תוכנית_סיוע</strong>: אחת מחמש תוכניות הסיוע: עיוורים (5), חירשים (6), מונשמים (7), כלבי נחייה (8), טלפון (9)</li>
+  <li><strong>חודש_עיבוד</strong>: החודש שעבורו מתבצע חישוב ותשלום הסיוע, בפורמט MM/YYYY</li>
+  <li><strong>בקשת_תשלום</strong>: רשומת בקשה לתשלום סיוע עבור מטופל בחודש עיבוד מסוים</li>
+  <li><strong>סעיף_תקציבי</strong>: סעיף תקציבי במרכבה שממנו מתבצע התשלום</li>
+  <li><strong>סוג_עזרה (AidType)</strong>: סיווג סוג העזרה הניתנת למטופל (עובד/לא עובד, גיל פנסיה, תעריף מינימום)</li>
+  <li><strong>עיבוד_שוטף</strong>: תהליך חישוב תשלומים חודשי רגיל</li>
+  <li><strong>תשלום_רטרואקטיבי</strong>: תשלום עבור תקופה קודמת שלא שולמה בזמנה</li>
+  <li><strong>ביטול_עיבוד</strong>: ביטול עיבוד חודשי שכבר בוצע</li>
+  <li><strong>BaseEntity</strong>: מחלקת בסיס אבסטרקטית בשכבת BO המספקת מיפוי DataRow לאובייקטים</li>
+  <li><strong>Active_Directory</strong>: שירות ספריות של Windows לניהול הרשאות משתמשים</li>
+  <li><strong>תובחה (Tovcha)</strong>: תהליך העברת נתונים למרכבה</li>
+  <li><strong>סטטוס_חיזון</strong>: סטטוס חיצוני שמתקבל ממרכבה על מצב הבקשה</li>
+</ul>
+
+<h2 id="דרישות">דרישות</h2>
+
+<h3 id="דרישה-1-ארכיטקטורת-המערכת-מבנה-שכבות-3-tier-">דרישה 1: ארכיטקטורת המערכת - מבנה שכבות (3-Tier)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את מבנה השכבות של המערכת, כדי שאוכל לנווט בקוד ולהבין את זרימת הנתונים.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE PaymentsAid_UI SHALL תלוי בשלוש שכבות: PaymentsAid_BL, PaymentsAid_BO ו-PaymentsAid_DAL כפרויקטים מקושרים (ProjectReference)</p>
+<p>2. THE PaymentsAid_BL SHALL תלוי בשתי שכבות: PaymentsAid_BO ו-PaymentsAid_DAL כפרויקטים מקושרים</p>
+<p>3. THE PaymentsAid_BO SHALL תלוי בשכבה אחת: PaymentsAid_DAL כפרויקט מקושר</p>
+<p>4. THE PaymentsAid_DAL SHALL לא תלוי באף פרויקט פנימי אחר ומשמשת כשכבה הבסיסית ביותר</p>
+<p>5. THE PaymentsAid_UI SHALL מוגדרת כ-WinExe (אפליקציית Windows) עם נקודת כניסה <code>Mosa.PaymentsAid.Win.Program</code></p>
+<p>6. THE PaymentsAid_BL SHALL מוגדרת כספריית מחלקות (Library) עם namespace <code>Mosa.PaymentsAid.BL</code></p>
+<p>7. THE PaymentsAid_BO SHALL מוגדרת כספריית מחלקות (Library) עם namespace <code>Mosa.PaymentsAid.BO</code></p>
+<p>8. THE PaymentsAid_DAL SHALL מוגדרת כספריית מחלקות (Library) עם namespace <code>Mosa.PaymentsAid.Dal</code></p>
+<p>9. THE PaymentsAid_UI SHALL מתייחסת לספריות חיצוניות: MosaGeneralDataBL, MosaGeneralDataBO, MosaGeneralDataDal (נתונים כלליים של מוסא), ActiveReports3 (דוחות), Microsoft.ReportViewer (הצגת דוחות), XPCommonControls (פקדי UI)</p>
+
+<h3 id="דרישה-2-שכבת-האובייקטים-העסקיים-bo-מודל-הנתונים">דרישה 2: שכבת האובייקטים העסקיים (BO) - מודל הנתונים</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את מודל הנתונים של המערכת, כדי שאוכל להבין את הישויות העסקיות ואת הקשרים ביניהן.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE BaseEntity SHALL מספקת מחלקת בסיס אבסטרקטית שכל אובייקט עסקי יורש ממנה, עם מתודה אבסטרקטית <code>PopulateFromDataRow(DataRow dr)</code> למיפוי שורת נתונים לאובייקט</p>
+<p>2. THE BaseEntity SHALL מספקת מתודה גנרית סטטית <code>PopulateList&lt;T&gt;(DataTable dt)</code> ליצירת רשימת אובייקטים מטבלת נתונים</p>
+<p>3. THE BaseEntity SHALL מספקת מתודות עזר <code>GetNullableValueFromColum&lt;T&gt;</code> ו-<code>GetValueFromColum&lt;T&gt;</code> לטיפול בערכי null מבסיס הנתונים</p>
+<p>4. WHEN אובייקט עסקי נוצר מ-DataRow, THE BaseEntity SHALL ממפה כל עמודה לשדה המתאים באובייקט באמצעות המתודה <code>PopulateFromDataRow</code></p>
+<p>5. THE PaymentsAid_BO SHALL מכילה את הישויות העסקיות הבאות: PatientDetails (פרטי מטופל), Requests (בקשות תשלום), SupportApplication (בקשות תמיכה), Blind (עיוורים), Deaf (חירשים), Respirator (מונשמים), BlindDog (כלבי נחייה), HashavutPayments (תשלומי חשבות), MattasPayments (תשלומי מט"ס), MonthsProcess (חודשי עיבוד), AidType (סוגי עזרה), Eligible (זכאויות), EntitlementDecision (החלטות זכאות), DoublePayments (תשלומים כפולים), TimingInterface (תזמון ממשקים), Users (משתמשים)</p>
+<p>6. THE PatientDetails SHALL מכילה שדות: סוג זהות, מספר זהות, סמל מערכת, שם פרטי, שם משפחה, מין, תאריך לידה, כתובת, עיר, מיקוד, רשות מקומית, בנק, סניף, חשבון בנק, מספר מרגנית, סטטוס מרכבה, מספר מרכבה, פרטי מקבל פנסיה</p>
+<p>7. THE Requests SHALL מכילה שדות לניהול בקשת תשלום כולל: סוג זהות, מספר זהות, סמל מערכת, חודש דיווח, חודש עיבוד, סטטוס בקשה, סטטוס תשלום, סכום תשלום, סוג עזרה, סיווג תקציבי, סעיף תקציבי, סטטוס מרכבה</p>
+<p>8. THE SupportApplication SHALL מכילה שדות לניהול בקשת תמיכה במרכבה כולל: מספר בקשה, שנת בקשה, מספר רשומה, אסמכתא, תקנה, מרכז מימון, סכום הוצאה, סטטוס חיזון מרכבה, שובר מרכבה</p>
+
+<h3 id="דרישה-3-שכבת-הגישה-לנתונים-dal-תבנית-גישה-לנתונים">דרישה 3: שכבת הגישה לנתונים (DAL) - תבנית גישה לנתונים</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין כיצד המערכת ניגשת לבסיס הנתונים, כדי שאוכל לתחזק ולהרחיב את שאילתות הנתונים.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE PaymentsAid_DAL SHALL משתמשת בתבנית Typed DataSet של .NET עם קבצי XSD המגדירים את מבנה הנתונים ו-TableAdapters לגישה לבסיס הנתונים</p>
+<p>2. WHEN שאילתת נתונים מתבצעת, THE PaymentsAid_DAL SHALL משתמשת ב-Stored Procedures (פרוצדורות מאוחסנות) בבסיס הנתונים, כפי שמשתקף בשמות כמו <code>usp_APP_PATIENT_DETAILS_Select</code>, <code>usp_APP_REQUESTS_Select</code></p>
+<p>3. THE PaymentsAid_DAL SHALL מתחברת לבסיס נתונים SQL Server בשם <code>SA_RSA_PAYMENTS_AID</code> באמצעות Windows Integrated Security</p>
+<p>4. THE PaymentsAid_DAL SHALL מכילה DAL נפרד לכל ישות עסקית: PatientDetailsDal, RequestsDal, SupportApplicationDal, BlindDal, DeafDal, RespiratorDal, BlindDogDal, HashavutPaymentsDal, MattasPaymentsDal, MonthsProcessDal, ועוד</p>
+<p>5. WHEN קובץ XSD מעודכן, THE PaymentsAid_DAL SHALL מייצרת אוטומטית קוד Designer.cs באמצעות MSDataSetGenerator</p>
+<p>6. THE PaymentsAid_UI SHALL מתחברת גם לבסיס נתונים <code>MOSA_GENERAL_DATA</code> עבור נתונים כלליים של מוסא (רשויות, ערים וכדומה)</p>
+
+<h3 id="דרישה-4-שכבת-הלוגיקה-העסקית-bl-תבנית-עבודה">דרישה 4: שכבת הלוגיקה העסקית (BL) - תבנית עבודה</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את תבנית הלוגיקה העסקית, כדי שאוכל להוסיף לוגיקה חדשה בצורה עקבית.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE PaymentsAid_BL SHALL מממשת כל מחלקת BL כיורשת של מחלקת BO המתאימה (לדוגמה: <code>PatientDetailsBL : PatientDetails</code>, <code>RequestsBL : Requests</code>, <code>SupportApplicationBL : SupportApplication</code>)</p>
+<p>2. THE PaymentsAid_BL SHALL מספקת בכל מחלקת BL מתודות CRUD: Select (שליפה), Insert (הוספה), Update (עדכון), Delete (מחיקה) לפי הצורך</p>
+<p>3. WHEN מתודת Select מופעלת, THE PaymentsAid_BL SHALL יוצרת TableAdapter מה-DAL, מפעילה את מתודת GetData המתאימה, וממירה את התוצאה לרשימת אובייקטים באמצעות <code>BaseEntity.PopulateList&lt;T&gt;</code></p>
+<p>4. WHEN מתודת InsertUpdate מופעלת, THE PaymentsAid_BL SHALL יוצרת TableAdapter מה-DAL ומעבירה את כל שדות האובייקט כפרמטרים ל-Stored Procedure המתאים</p>
+<p>5. THE PaymentsAid_BL SHALL מכילה מחלקת <code>Common</code> עם הגדרות קבועות, enums ופונקציות עזר המשמשות את כל המערכת</p>
+<p>6. THE Common SHALL מגדירה enums עבור: Gender (מין), PensionAge (גיל פנסיה), RequestStatus (סטטוס בקשה: שוטף=1, רטרואקטיבי=2, חריג=3, לא שולם=4, ניכוי=5, ביטול=6), PaymentType (סוג תשלום), PaymentStatus (סטטוס תשלום: ממתין=1, עבר=2, לא לעיבוד=3), UserGroup (קבוצת משתמש: צפייה=1, הרצה=2), PaymentTypeSymbol (סמל סוג תשלום), ProgramSymbol (סמל תוכנית: עיוורים=5, חירשים=6, מונשמים=7, כלבי נחייה=8, טלפון=9)</p>
+<p>7. THE Common SHALL מספקת פונקציות עזר לעיצוב תאריכים ומחרוזות SQL: <code>MakeStringSQL</code>, <code>MakeStringYYYYMM</code>, <code>MakeStr4DateSQL</code>, <code>MakeStr4DateFrom</code>, <code>MakeStr4DateTo</code></p>
+<p>8. THE Common SHALL מספקת פונקציות להחלפת שפת מקלדת בין עברית לאנגלית באמצעות <code>LoadKeyboardLayout</code></p>
+
+<h3 id="דרישה-5-אימות-משתמשים-והרשאות">דרישה 5: אימות משתמשים והרשאות</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את מנגנון ההרשאות, כדי שאוכל להבין מי יכול לבצע פעולות במערכת.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. WHEN המערכת מופעלת, THE PaymentsAid_UI SHALL בודקת את זהות המשתמש באמצעות <code>WindowsIdentity.GetCurrent()</code> ומחלצת את שם המשתמש מה-Active Directory</p>
+<p>2. WHEN המשתמש שייך לקבוצת <code>AVODA_NT\SiyoaR</code>, THE PaymentsAid_UI SHALL מקצה הרשאת צפייה בלבד (View)</p>
+<p>3. WHEN המשתמש שייך לקבוצת <code>AVODA_NT\SiyoaWrite</code>, THE PaymentsAid_UI SHALL מקצה הרשאת הרצה (Run) המאפשרת ביצוע פעולות</p>
+<p>4. IF המשתמש אינו שייך לאף אחת מהקבוצות המורשות, THEN THE PaymentsAid_UI SHALL סוגרת את האפליקציה מיד ללא הצגת ממשק</p>
+<p>5. WHILE המשתמש בעל הרשאת צפייה בלבד, THE PaymentsAid_UI SHALL מנטרלת את הקישור להכנת עיבוד (xpLinkedIbudPreparation) ומונעת ביצוע פעולות כתיבה</p>
+<p>6. THE PaymentsAid_UI SHALL בודקת מופע קודם של האפליקציה באמצעות <code>CheckForPreviousInstance</code> ומונעת הפעלה כפולה</p>
+
+<h3 id="דרישה-6-מסך-ראשי-וניווט">דרישה 6: מסך ראשי וניווט</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את מבנה המסך הראשי, כדי שאוכל להבין את זרימת הניווט במערכת.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE MainForm SHALL מוגדרת כטופס MDI (Multiple Document Interface) המכילה SplitContainer עם פאנל ניווט שמאלי ואזור תוכן ימני</p>
+<p>2. THE MainForm SHALL מציגה קישורי ניווט לחמישה מודולים: הכנת עיבוד (RequestForm), תשלום רטרואקטיבי (RetroPaymentForm), דוחות (Reports), שאילתות (QueryForm), היסטוריית תשלומים רטרואקטיביים (RetroPaymentHistory), ועדכון תעריפים (TaarifimForm)</p>
+<p>3. WHEN המשתמש לוחץ על קישור ניווט, THE MainForm SHALL יוצרת מופע חדש של הטופס המתאים, מגדירה אותו כטופס-בן MDI, ומנטרלת את פאנל הניווט</p>
+<p>4. WHEN טופס-בן נסגר, THE MainForm SHALL מפעילה מחדש את פאנל הניווט</p>
+<p>5. THE MainForm SHALL מציגה מספר גרסה בשורת הסטטוס (גרסה נוכחית: 3.18.05.06 - Staging)</p>
+<p>6. WHEN המשתמש לוחץ על קישור יציאה, THE MainForm SHALL סוגרת את כל טפסי הבנים ומסיימת את האפליקציה</p>
+
+<h3 id="דרישה-7-תהליך-עיבוד-שוטף-הכנת-עיבוד-requestform-">דרישה 7: תהליך עיבוד שוטף (הכנת עיבוד - RequestForm)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את תהליך העיבוד השוטף, כדי שאוכל לתחזק את הלוגיקה המרכזית של המערכת.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE RequestForm SHALL מאפשרת בחירת תוכנית סיוע פעילה באמצעות checkboxes: עיוורים, חירשים, מונשמים, כלבי נחייה, טלפון</p>
+<p>2. THE RequestForm SHALL מציגה את חודש העיבוד הנוכחי לכל תוכנית סיוע מטבלת <code>MonthsProcess</code></p>
+<p>3. THE RequestForm SHALL מבצעת תהליך עיבוד רב-שלבי הכולל: שלב 0 - קידום חודש עיבוד, שלב 1 - בדיקת מטופלים לעיבוד שוטף, שלב 2 - ביצוע עיבוד, שלב 3 - העברת בקשות תמיכה למרכבה, שלב 4 - בדיקת סטטוס בקשות תמיכה, שלב 5 - העברת דרישות תשלום למרכבה, שלב 6 - בדיקת סטטוס דרישות תשלום</p>
+<p>4. WHEN שלב בדיקת מטופלים (שלב 1) מופעל עבור תוכנית עיוורים, THE RequestForm SHALL מפעילה את <code>CheckPationtForBlind()</code> הבודקת: קיום פרטי מטופל, קיום פרטי בנק, החלטת זכאות, גיל פנסיה, סטטוס תעסוקה, ובודקת זכאות מול שירות חסמות</p>
+<p>5. WHEN שלב בדיקת מטופלים (שלב 1) מופעל עבור תוכנית חירשים, THE RequestForm SHALL מפעילה את <code>CheckPationtForDeaf()</code> הבודקת: קיום פרטי מטופל, קיום פרטי בנק, החלטת זכאות, גיל פנסיה, סטטוס תעסוקה, האם גם עיוור, ובודקת זכאות מול שירות חסמות</p>
+<p>6. WHEN שלב בדיקת מטופלים (שלב 1) מופעל עבור תוכנית מונשמים, THE RequestForm SHALL מפעילה את <code>CheckPationtForRespirator()</code> הבודקת: קיום פרטי מטופל, קיום פרטי בנק, סטטוס טרכאוסטומיה, זכאות ביטוח לאומי, היתר עובד זר</p>
+<p>7. WHEN שלב בדיקת מטופלים (שלב 1) מופעל עבור תוכנית כלבי נחייה, THE RequestForm SHALL מפעילה את <code>CheckPationtForDogs()</code> הבודקת: קיום פרטי מטופל, קיום פרטי בנק, תאריכי תוקף כלב נחייה</p>
+<p>8. WHEN שלב חישוב (שלב 2) מופעל, THE RequestForm SHALL מחשבת סכום תשלום לכל מטופל לפי סוג העזרה, תעריפים, וסטטוס תעסוקה, ויוצרת רשומות בקשות תשלום (Requests)</p>
+<p>9. WHEN שלב העברה למרכבה (שלב 3) מופעל, THE RequestForm SHALL יוצרת רשומות SupportApplication ומעבירה אותן למרכבה באמצעות ממשק התובחה</p>
+<p>10. WHEN שלב בדיקת סטטוס (שלב 4) מופעל, THE RequestForm SHALL בודקת את סטטוס החיזון שהתקבל ממרכבה עבור כל בקשת תמיכה</p>
+<p>11. THE RequestForm SHALL מציגה DataGridView עם רשימת בקשות התשלום, בקשות התמיכה, ובעיות שנמצאו בעיבוד</p>
+<p>12. WHEN העיבוד מסתיים, THE RequestForm SHALL מייצרת קבצי פלט לחשבות (ExportFileHashavut) ולמט"ס (ExportFileMattas) בפורמט קבוע</p>
+
+<h3 id="דרישה-8-חישוב-סכומי-תשלום">דרישה 8: חישוב סכומי תשלום</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את לוגיקת חישוב התשלומים, כדי שאוכל לתחזק ולעדכן את החישובים.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. WHEN חישוב מתבצע עבור עיוור, THE RequestForm SHALL קובעת סוג עזרה (PaymentTypeSymbol) לפי: עיוור עובד (51), עיוור לא עובד (52), תעריף מינימום (53), עיוור בגיל פנסיה (54)</p>
+<p>2. WHEN חישוב מתבצע עבור חירש, THE RequestForm SHALL קובעת סוג עזרה לפי: חירש עובד (61), חירש לא עובד (62), חירש בגיל פנסיה עובד (63), חירש בגיל פנסיה לא עובד (64)</p>
+<p>3. WHEN חישוב מתבצע עבור מונשם, THE RequestForm SHALL משתמשת בסוג עזרה מונשם (71)</p>
+<p>4. WHEN חישוב מתבצע עבור כלב נחייה, THE RequestForm SHALL משתמשת בסוג עזרה כלבי נחייה (81)</p>
+<p>5. THE RequestForm SHALL מחשבת גיל פנסיה לפי מין: גבר - 67, אישה - 62 (PensionAge), עם תמיכה בגיל פנסיה ישן: גבר - 65, אישה - 60 (OldPensionAge)</p>
+<p>6. THE RequestForm SHALL מחשבת גיל פנסיה לעיוורים בנפרד: גבר - 67, אישה - 62 (PensionAgeBlind)</p>
+<p>7. WHEN סכום התשלום חורג מהתקציב, THE RequestForm SHALL מסמנת את הבקשה כחריגה (IfExceeding) עם סטטוס: חריגה ממתינה לחריג (0), חריגה ממתינה לאנלה (1), לא חורגת (9)</p>
+<p>8. THE RequestForm SHALL בודקת תשלומים כפולים באמצעות <code>checkDoublePayment()</code> ושולחת התראה במייל כאשר מזוהים תשלומים כפולים</p>
+
+<h3 id="דרישה-9-תשלום-רטרואקטיבי-retropaymentform-">דרישה 9: תשלום רטרואקטיבי (RetroPaymentForm)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את תהליך התשלום הרטרואקטיבי, כדי שאוכל לטפל בבקשות תשלום עבור תקופות קודמות.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE RetroPaymentForm SHALL מאפשרת חיפוש מטופל לפי סוג זהות ומספר זהות</p>
+<p>2. THE RetroPaymentForm SHALL מציגה את פרטי המטופל האישיים, פרטי בנק, ופרטים ספציפיים לתוכנית הסיוע</p>
+<p>3. WHEN מטופל נמצא, THE RetroPaymentForm SHALL טוענת את היסטוריית הבקשות שלו ומציגה אותן ב-DataGridView</p>
+<p>4. THE RetroPaymentForm SHALL מאפשרת בחירת תוכנית סיוע (עיוורים, חירשים, מונשמים, כלבי נחייה) ומציגה שדות רלוונטיים לתוכנית הנבחרת</p>
+<p>5. WHEN תשלום רטרואקטיבי מתבצע עבור עיוור, THE RetroPaymentForm SHALL מפעילה את <code>DoCalculationForBlind()</code> הבודקת זכאות, מחשבת סכום, ויוצרת בקשת תשלום עם סטטוס רטרואקטיבי (RequestStatus=2)</p>
+<p>6. WHEN תשלום רטרואקטיבי מתבצע עבור חירש, THE RetroPaymentForm SHALL מפעילה את <code>DoCalculationForDeaf()</code> הבודקת זכאות, מחשבת סכום, ויוצרת בקשת תשלום</p>
+<p>7. WHEN תשלום רטרואקטיבי מתבצע עבור מונשם, THE RetroPaymentForm SHALL בודקת תנאים מוקדמים באמצעות <code>CheckBeforeRespiratorOrder()</code> לפני ביצוע החישוב</p>
+<p>8. THE RetroPaymentForm SHALL בודקת זכאות מול שירות חסמות (Hasamot) באמצעות <code>CheckEntitlementFromHasamot()</code> לפני אישור תשלום</p>
+<p>9. THE RetroPaymentForm SHALL מאפשרת מחיקת בקשת תשלום רטרואקטיבי קיימת</p>
+<p>10. THE RetroPaymentForm SHALL בודקת שהעיבוד השוטף הושלם לפני שמאפשרת תשלום רטרואקטיבי באמצעות <code>checkIfIbudIsDone()</code></p>
+
+<h3 id="דרישה-10-ביטול-עיבוד-cancelibud-">דרישה 10: ביטול עיבוד (CancelIbud)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את תהליך ביטול העיבוד, כדי שאוכל לטפל במקרים שבהם נדרש לבטל עיבוד שבוצע.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE CancelIbud SHALL מאפשרת שני סוגי ביטול: ביטול מלא (MakeFullCancelation) של כל העיבוד לחודש מסוים, וביטול למטופל ספציפי (MakePationCancelation)</p>
+<p>2. THE CancelIbud SHALL מאפשרת בחירת תוכנית סיוע (עיוורים, חירשים, כלבי נחייה) לביטול</p>
+<p>3. WHEN ביטול מלא מתבצע, THE CancelIbud SHALL מפעילה את <code>RequestsBL.CancelIbud()</code> המבטלת את כל בקשות התשלום לחודש העיבוד הנבחר</p>
+<p>4. WHEN ביטול למטופל ספציפי מתבצע, THE CancelIbud SHALL מאפשרת חיפוש מטופל לפי תעודת זהות ומפעילה את <code>RequestsBL.CancelIbudForPation()</code></p>
+<p>5. WHEN ביטול מתבצע, THE CancelIbud SHALL בודקת תחילה שלא בוצע ביטול קודם באמצעות <code>RequestsBL.checkCancelation()</code></p>
+
+<h3 id="דרישה-11-ממשק-מרכבה-merkava-interface-">דרישה 11: ממשק מרכבה (Merkava Interface)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את הממשק עם מערכת מרכבה, כדי שאוכל לטפל בבעיות ממשק ולהבין את זרימת הנתונים.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE PaymentsAid_UI SHALL מתממשקת עם מרכבה באמצעות תהליך תובחה (Tovcha) להעברת בקשות תמיכה ודרישות תשלום</p>
+<p>2. THE TimingInterface SHALL מנהלת את תזמון הממשקים עם מרכבה כולל: קוד מערכת שולחת (SendSystemCode=7), קוד מערכת מקבלת (ReceiveSystemCode=6), קוד ממשק תמיכה (InterfaceCodeSupport=12), קוד ממשק דרישה (InterfaceCodeRequest=13)</p>
+<p>3. THE SupportApplication SHALL מייצגת בקשת תמיכה במרכבה עם שדות: מספר בקשה, שנת בקשה, תקנה, מרכז מימון, סכום הוצאה, סטטוס חיזון, שובר מרכבה</p>
+<p>4. THE HashavutPayments SHALL מייצגת דרישת תשלום לחשבות עם שדות: סעיף תקציבי, סכום נטו, סכום שוטף, סכום רטרואקטיבי, תקנה, מרכז מימון, מספר דרישה, אסמכתא, סטטוס חיזון מרכבה</p>
+<p>5. WHEN סטטוס חיזון מתקבל ממרכבה, THE PaymentsAid_BL SHALL מעדכנת את סטטוס בקשת התמיכה ודרישת התשלום בהתאם</p>
+<p>6. THE PaymentsAid_UI SHALL מציגה את סטטוס החיזון של מרכבה ב-DataGridView ייעודי (dgRequestStatusHizon9)</p>
+
+<h3 id="דרישה-12-ממשק-חסמות-hasamot-web-service-">דרישה 12: ממשק חסמות (Hasamot Web Service)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את הממשק עם שירות חסמות, כדי שאוכל להבין כיצד נבדקות זכאויות.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE PaymentsAid_UI SHALL מתחברת לשירות Web של חסמות בכתובת <code>http://adabas/MosaIntegrationWS/Hasamot.asmx</code></p>
+<p>2. WHEN בדיקת זכאות מתבצעת, THE RequestForm SHALL מפעילה את <code>CheckEntitlementFromHasamot()</code> השולחת בקשה לשירות חסמות עם פרטי המטופל וחודש הדיווח</p>
+<p>3. THE PaymentsAid_UI SHALL מקבלת מחסמות אובייקט <code>HasamaWithMisgeretInfo</code> המכיל מידע על הסמכה רפואית ומסגרת</p>
+<p>4. WHEN חסמות מחזירה שהמטופל אינו זכאי, THE RequestForm SHALL מסמנת את המטופל כבעייתי ומוסיפה אותו לרשימת הבעיות</p>
+
+<h3 id="דרישה-13-ייצוא-קבצי-תשלום">דרישה 13: ייצוא קבצי תשלום</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את תהליך ייצוא קבצי התשלום, כדי שאוכל לתחזק את הממשקים עם מערכות חיצוניות.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. WHEN עיבוד מסתיים עבור עיוורים או כלבי נחייה, THE RequestForm SHALL מייצרת קובץ חשבות (ExportFileHashavut) וקובץ מט"ס לעיוורים (ExportFileMattasBlind) בפורמט קבוע</p>
+<p>2. WHEN עיבוד מסתיים עבור חירשים, THE RequestForm SHALL מייצרת קובץ מט"ס לחירשים (ExportFileMattasDeaf) בפורמט קבוע</p>
+<p>3. WHEN עיבוד מסתיים עבור מונשמים, THE RequestForm SHALL מייצרת קובץ חשבות למונשמים (ExportFileHashavutRespiration) בפורמט קבוע</p>
+<p>4. THE RequestForm SHALL שומרת את קבצי הפלט בתיקיית <code>Output</code> שנוצרת אוטומטית בהפעלת המערכת</p>
+<p>5. THE PaymentsAid_UI SHALL מאפשרת הגדרה בקובץ app.config האם לייצר קובץ חשבות (<code>MakeHashavutFile=True/False</code>)</p>
+
+<h3 id="דרישה-14-דוחות-reports-">דרישה 14: דוחות (Reports)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את מערכת הדוחות, כדי שאוכל להוסיף ולתחזק דוחות.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE Reports SHALL מאפשרת בחירת תוכנית סיוע (עיוורים, חירשים, מונשמים, כלבי נחייה, טלפון) ובחירת סוג דוח</p>
+<p>2. THE Reports SHALL מאפשרת סינון דוחות לפי טווח תאריכים, רשות מקומית, וסטטוס</p>
+<p>3. THE PaymentsAid_UI SHALL משתמשת ב-Microsoft ReportViewer להצגת דוחות מ-SQL Server Reporting Services (SSRS) בכתובת המוגדרת ב-app.config (<code>ReportServer</code>, <code>ReportPath</code>)</p>
+<p>4. THE Reports SHALL מציגה דוחות שונים לכל תוכנית סיוע כולל: דוח סטטיסטי, דוח תשלומים, דוח בעיות</p>
+<p>5. THE GeneralFunc SHALL מספקת פונקציה <code>RenderProblemPatientReport()</code> ליצירת דוח מטופלים בעייתיים ושליחתו במייל</p>
+
+<h3 id="דרישה-15-מערכת-דואר-אלקטרוני">דרישה 15: מערכת דואר אלקטרוני</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את מנגנון שליחת המיילים, כדי שאוכל לתחזק את ההתראות האוטומטיות.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE MailHelper SHALL מאפשרת שליחת מיילים עם קבצים מצורפים באמצעות SMTP</p>
+<p>2. THE MailHelper SHALL תומכת ברינדור דוחות SSRS לקבצי PDF וצירופם למייל</p>
+<p>3. THE MailHelper SHALL שומרת רשומת מייל בבסיס הנתונים באמצעות <code>MailsBL.InsertMails()</code> כולל: כתובת שולח, כתובת נמען, נושא, גוף הודעה, תאריך קבלה, סטטוס שליחה</p>
+<p>4. THE MailHelper SHALL שומרת קבצים מצורפים בבסיס הנתונים באמצעות <code>MailsAttachmentsBL.InsertUpdateMailsAttachments()</code></p>
+<p>5. WHEN תשלומים כפולים מזוהים, THE GeneralFunc SHALL שולחת מייל התראה עם טבלת HTML המפרטת את המטופלים עם תשלומים כפולים, לכתובות המוגדרות ב-app.config (<code>DoublePaymentsProgram5And8MailAdress</code>, <code>DoublePaymentsProgram6MailAdress</code>)</p>
+<p>6. THE MailHelper SHALL משתמשת בכתובת שולח <code>MerkavaTovchaUser@molsa.gov.il</code> לשליחת מיילים אוטומטיים</p>
+
+<h3 id="דרישה-16-ניהול-תעריפים-taarifimform-">דרישה 16: ניהול תעריפים (TaarifimForm)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את ניהול התעריפים, כדי שאוכל לעדכן תעריפי תשלום.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE TaarifimForm SHALL מציגה טבלת תעריפים ב-DataGridView עם אפשרות סינון לפי תוכנית סיוע</p>
+<p>2. THE TaarifimForm SHALL מאפשרת עדכון תעריף חדש עבור סוג עזרה נבחר</p>
+<p>3. THE TaarifimForm SHALL מאפשרת הצגת פרטי תעריף כולל: סוג עזרה, תיאור, סכום נוכחי, סכום חדש</p>
+<p>4. THE TaarifimForm SHALL מאפשרת הדפסת טבלת התעריפים</p>
+<p>5. THE TaarifimForm SHALL מאמתת שהתעריף החדש הוא מספרי בלבד באמצעות <code>OnlyNum()</code> KeyPress handler</p>
+
+<h3 id="דרישה-17-שאילתות-וחיפוש-queryform-">דרישה 17: שאילתות וחיפוש (QueryForm)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את מודול השאילתות, כדי שאוכל לחפש מידע על מטופלים ובקשות.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE QueryForm SHALL מאפשרת חיפוש מטופלים ובקשות תשלום לפי פרמטרים שונים</p>
+<p>2. THE QueryForm SHALL מציגה תוצאות חיפוש ב-DataGridView</p>
+<p>3. THE QueryForm SHALL מאפשרת סינון לפי תוכנית סיוע, תקופה, סטטוס בקשה, וסטטוס תשלום</p>
+
+<h3 id="דרישה-18-תוכניות-סיוע-מודל-נתונים-ספציפי">דרישה 18: תוכניות סיוע - מודל נתונים ספציפי</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את המודל הספציפי לכל תוכנית סיוע, כדי שאוכל לטפל בלוגיקה הייחודית לכל תוכנית.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE Blind SHALL מכילה שדות ספציפיים לעיוורים: סטטוס תעסוקה, החלטת זכאות, תאריך אישור זכאות, תאריך תחילת זכאות, תאריכי עבודה, סטטוס שר"ם, האם גם חירש</p>
+<p>2. THE Deaf SHALL מכילה שדות ספציפיים לחירשים: סטטוס תעסוקה, החלטת זכאות, תאריך אישור זכאות, תאריך תחילת זכאות, תאריכי עבודה, האם גם עיוור</p>
+<p>3. THE Respirator SHALL מכילה שדות ספציפיים למונשמים: האם טרכאוסטומיה, זכאות ביטוח לאומי (BTL), היתר עובד זר, תאריך פטירה, בעלות חשבון בנק, פרטי מקבל תשלום (אפוטרופוס), פקס, טלפון, מייל</p>
+<p>4. THE BlindDog SHALL מכילה שדות ספציפיים לכלבי נחייה כולל פרטי מטופל, פרטי בנק, ותאריכי תוקף</p>
+<p>5. THE MattasPayments SHALL מכילה שדות לתשלומי מט"ס: סכום חודשי, מהות נזקקות (QualityNeed), סוג עזרה, סיווג תקציבי</p>
+<p>6. THE HashavutPayments SHALL מכילה שדות לתשלומי חשבות: סעיף תקציבי, סכום נטו, סכום שוטף, סכום רטרואקטיבי, תקנה, מרכז מימון, מספר דרישה, אסמכתא, סטטוס חיזון מרכבה</p>
+
+<h3 id="דרישה-19-טיפול-בשגיאות-ובעיות">דרישה 19: טיפול בשגיאות ובעיות</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין כיצד המערכת מטפלת בשגיאות ובעיות, כדי שאוכל לאבחן ולתקן בעיות.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. WHEN בעיה מזוהה במטופל במהלך עיבוד, THE RequestForm SHALL מוסיפה את המטופל לרשימת בעיות (ProblemReason) ומציגה אותו ב-DataGridView ייעודי</p>
+<p>2. WHEN עיבוד מסתיים עם בעיות, THE GeneralFunc SHALL מייצרת דוח מטופלים בעייתיים ושולחת אותו במייל לכתובת המוגדרת ב-app.config</p>
+<p>3. THE PaymentsAid_BO SHALL מספקת שדה <code>ErrorString</code> ב-BaseEntity לתיעוד שגיאות ברמת האובייקט</p>
+<p>4. THE SupportApplication SHALL מספקת שדות <code>ErrorFiledDesc</code> ו-<code>ErrorDesc</code> לתיעוד שגיאות מרכבה</p>
+<p>5. IF שגיאת חיזון מתקבלת ממרכבה, THEN THE PaymentsAid_BL SHALL מעדכנת את שדה <code>MerkavaErrorDesc</code> בדרישת התשלום ומציגה את השגיאה למשתמש</p>
+
+<h3 id="דרישה-20-הגדרות-תצורה-configuration-">דרישה 20: הגדרות תצורה (Configuration)</h3>
+
+<p><strong>סיפור משתמש:</strong> כמפתח חדש, אני רוצה להבין את הגדרות התצורה של המערכת, כדי שאוכל להגדיר סביבות עבודה שונות.</p>
+
+<h4 id="קריטריוני-קבלה">קריטריוני קבלה</h4>
+
+<p>1. THE PaymentsAid_UI SHALL קוראת הגדרות חיבור לבסיס נתונים מקובץ app.config כולל: connection string ל-SA_RSA_PAYMENTS_AID ול-MOSA_GENERAL_DATA</p>
+<p>2. THE PaymentsAid_UI SHALL קוראת הגדרות שרת דוחות מקובץ app.config: <code>ReportServer</code> (כתובת שרת SSRS) ו-<code>ReportPath</code> (נתיב דוחות)</p>
+<p>3. THE PaymentsAid_UI SHALL קוראת כתובת שירות חסמות מהגדרות האפליקציה: <code>PaymentsAid_Hasamot_Hasamot</code></p>
+<p>4. THE PaymentsAid_UI SHALL קוראת כתובות מייל להתראות מקובץ app.config: <code>MailAdress</code>, <code>DoublePaymentsProgram5And8MailAdress</code>, <code>DoublePaymentsProgram6MailAdress</code></p>
+<p>5. THE PaymentsAid_UI SHALL קוראת הגדרת <code>MakeHashavutFile</code> מקובץ app.config לקביעה האם לייצר קובץ חשבות</p>
+<p>6. THE PaymentsAid_UI SHALL בנויה על .NET Framework 2.0 עם תמיכה ב-Windows Integrated Security לאימות</p>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({startOnLoad:false, theme:'default', securityLevel:'loose'});
+(async function(){
+  const containers = document.querySelectorAll('.mermaid-container');
+  for(let i=0; i<containers.length; i++){
+    const c = containers[i];
+    const b64 = c.getAttribute('data-mermaid');
+    const src = decodeURIComponent(escape(atob(b64)));
+    try {
+      const {svg} = await mermaid.render('mermaid-'+i, src);
+      c.innerHTML = svg;
+    } catch(e) {
+      c.innerHTML = '<pre style="text-align:left;direction:ltr;background:#f8f8f8;padding:16px;border-radius:8px;white-space:pre-wrap;color:#333;">'+src.replace(/</g,'&lt;')+'<\/pre>';
+    }
+  }
+})();
+</script>
+</body>
+</html>
